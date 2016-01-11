@@ -21,6 +21,11 @@
    - [[http://code.enthought.com/projects/traits/][traits]]: by Enthought
      Includes a simple way of defining a function to call when a class
      property changes
+   - [[https://github.com/berkerpeksag/astor][astor]]: AST observe/rewrite
+   - [[http://svn.python.org/projects/python/trunk/Lib/lib2to3/][lib2to3]]: round tripping src -> AST -> src
+   - [[https://github.com/python-rope/rope][rope]]: python refactoring library
+   - [[http://svn.python.org/view/python/trunk/Demo/parser/unparse.py?view%3Dmarkup][unparse.py]]: "unparseing" AST
+   - [[https://redbaron.readthedocs.org/en/latest/][RedBaron]]: self-modifying python code
 
 
 ** Preamble
