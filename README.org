@@ -1,0 +1,263 @@
+
+
+* Workflow
+
+** Goal
+
+   Develop a compact, composable, extendable API for creating and
+   evaluating a workflow graph.
+
+** (Possibly) relevant work
+
+   - [[https://github.com/cloudmesh/task][cloudmesh_task]]
+   - [[http://www.celeryproject.org/][celery]]
+   - [[http://ccl.cse.nd.edu/software/workqueue/][Work Queue]]
+   - [[https://bitbucket.org/rfc1437/lazypy/][lazypy]]: a python promises framework
+     Provides:
+     - =lazy= / =delay=
+     - =spawn= / =future=
+     - =fork= / =forked=
+   - [[https://networkx.github.io/][NetworkX]]: library for working with graphs.
+   - [[http://code.enthought.com/projects/traits/][traits]]: by Enthought
+     Includes a simple way of defining a function to call when a class
+     property changes
+
+
+** Preamble (org-mode)
+
+   #+NAME: preamble
+   #+BEGIN_SRC sh :exports both
+   mkdir -p {code,images}/workflow
+   #+END_SRC
+
+   #+RESULTS: preamble
+
+   #+CALL: preamble
+
+** Design
+
+   Given a set of python functions
+
+   #+BEGIN_SRC python :session
+     def A(): return 40
+
+     def B(): return 2
+
+     def C(): return A() + B()
+   #+END_SRC
+
+   #+RESULTS:
+
+   we want to
+   #+BEGIN_EXAMPLE
+   (A | B) ; C
+   #+END_EXAMPLE
+
+   which means
+   #+BEGIN_QUOTE
+   Evaluate =A= and =B= in parallel, wait until both complete, then evaluate =C=
+   #+END_QUOTE
+
+*** Approaches
+
+    Fundamentally there are two phases to this problem:
+    1. creation of the call graph
+    2. evaluation of the call graph
+
+*** The naive solution
+
+    The call-graph is essentially the Abstract Syntax Tree of the
+    provided program. In the case of the example above, such a tree
+    could be:
+
+    #+BEGIN_SRC dot :file images/workflow/1.svg
+      digraph {
+              C -> A
+              C -> B
+      }
+    #+END_SRC
+    #+CAPTION: The arrows indicate the dependency direction: before =C= can be evaluated, =A= and =B= must be evaluated.
+    #+RESULTS:
+    [[file:images/workflow/1.svg]]
+
+    One approach to buid this in python could be the following:
+    #+CAPTION: The =@task= decorator is used to track the execution state of the evaluation and the =||= and =&&= are the overloaded boolean operators.
+    #+BEGIN_SRC python :session
+      @task
+      def A(): return 40
+
+      @task
+      def B(): return 2
+
+      @task
+      def C(): pass
+      # inspect call graph (an implicit global value) to call and retrieve
+      # the values of =A()= and =B()=.
+
+      evaluate((A || B) && C)
+    #+END_SRC
+
+    #+RESULTS:
+
+    A few problems will arise with this approach:
+    1. Expicitly creating the dependency graph will be error prone
+       for anything more than a simple workflow
+    2. How will function parameters, which may also be the tips of a
+       dependency tree, be incorporated?
+
+*** Implicitly building the graph
+
+    Rather than explictly building the call-graph, build the graph
+    implictly. Something like this would be ideal as boundary is
+    inferred from the calls to =A= and =B= withing =C=.:
+
+    #+BEGIN_SRC python :session
+      def A(): return 40
+
+      def B(): return 2
+
+      def C():
+          a = A()
+          b = B()
+          return a + b
+
+      print C()
+    #+END_SRC
+
+    #+RESULTS:
+
+    Since this is plain and simple Python code, the question then
+    becomes:
+    #+BEGIN_QUOTE
+    How to build a call-graph of a simple Python expression?
+    #+END_QUOTE
+
+    #+BEGIN_SRC python :session :results output :exports both :tangle code/workflow/prototype_callgraph.py
+      import sys
+      import subprocess
+      import networkx as nx
+      import ast
+      from functools import wraps
+      from textwrap import dedent
+      from pprint import pprint
+
+      code = dedent("""\
+      class task(object):
+          def __call__(self, fn):
+              @wraps(fn)
+              def wrapper(*args, **kws):
+                  return fn(*args, **kws)
+              return wrapper
+
+      @task()
+      def A(): return 40
+
+      @task()
+      def B(): return 2
+
+      def C(): print 'Not a task'
+
+      @task()
+      def D():
+          a = A()
+          b = B()
+          C()
+          return a + b
+
+      print D()
+      """)
+
+
+      class Visitor(ast.NodeVisitor):
+          def __init__(self, amount=2):
+              self._indent = 0
+              self._amount = amount
+              self.G = nx.DiGraph()
+              self.task_functions = ['START']
+              self.G.add_nodes_from(self.task_functions)
+
+          def _inc(self):
+              self._indent += self._amount
+
+          def _dec(self):
+              self._indent -= self._amount
+
+          def _print(self, node, extra=''):
+              # extra = extra or '(' + ','.join([k for k, _ in ast.iter_fields(node)]) + ')'
+              # print '|' + self._indent * '--', node.__class__.__name__ + extra
+              pass
+
+          def _recurse(self, node):
+              self._inc()
+              for child in ast.iter_child_nodes(node):
+                  self.visit(child)
+              self._dec()
+
+          def nest(self, name):
+              # print 'PUSH', self.task_functions, name
+              self.task_functions.append(name)
+
+          def pop(self):
+              # print 'POP', self.task_functions
+              if len(self.task_functions) > 1:
+                  self.task_functions.pop()
+
+          def _is_task(self, node):
+              assert isinstance(node, ast.FunctionDef), type(node)
+              for dec in node.decorator_list:
+                  return dec.func.id == 'task'
+
+
+          def visit_FunctionDef(self, node):
+              if self._is_task(node):
+                  self._print(node, extra='(name=%s)' % node.name)
+                  self.G.add_node(node.name)
+                  self.nest(node.name)
+              self._recurse(node)
+              self.pop()
+
+          def visit_Call(self, node):
+              child = node.func.id
+              self._print(node, extra='(f=%s)' % child)
+              parent = self.task_functions[-1]
+              assert parent in self.G, (parent, self.G.nodes())
+
+              if child in self.G.nodes():
+                  self.G.add_edge(parent, child)
+                  self.nest(child)
+              self._recurse(node)
+
+              if child in self.G.nodes():
+                  self.pop()
+              
+
+
+          def generic_visit(self, node):
+              # self._print(node)
+              self._recurse(node)
+
+      tree = ast.parse(code)
+      v = Visitor()
+      v.visit(tree)
+
+      dotfile = 'code/workflow/prototype_callgraph.dot'
+      nx.write_dot(v.G, dotfile)
+      svg = subprocess.check_output(['dot', '-Tsvg', dotfile])
+      with open('images/workflow/prototype_callgraph.svg', 'w') as fd:
+          fd.write(svg)
+    #+END_SRC
+
+    #+RESULTS:
+
+
+    #+BEGIN_SRC sh :file images/workflow/prototype_callgraph.svg
+      python code/workflow/prototype_callgraph.py
+    #+END_SRC
+
+    #+RESULTS:
+    [[file:images/workflow/prototype_callgraph.svg]]
+
+
+
+
+*** Dynamic vs Strict call-graph
