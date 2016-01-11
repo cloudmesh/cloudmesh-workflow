@@ -23,7 +23,9 @@
      property changes
 
 
-** Preamble (org-mode)
+** Preamble
+
+   Initialize directory structure.
 
    #+NAME: preamble
    #+BEGIN_SRC sh :exports both
@@ -132,16 +134,16 @@
     How to build a call-graph of a simple Python expression?
     #+END_QUOTE
 
-    #+BEGIN_SRC python :session :results output :exports both :tangle code/workflow/prototype_callgraph.py
+    #+BEGIN_SRC python :session :results value :exports both :tangle code/workflow/prototype_callgraph.py
       import sys
       import subprocess
       import networkx as nx
       import ast
-      from functools import wraps
       from textwrap import dedent
       from pprint import pprint
 
       code = dedent("""\
+      from functools import wraps
       class task(object):
           def __call__(self, fn):
               @wraps(fn)
@@ -175,39 +177,38 @@
               self.G = nx.DiGraph()
               self.task_functions = ['START']
               self.G.add_nodes_from(self.task_functions)
-
+          
           def _inc(self):
               self._indent += self._amount
-
+          
           def _dec(self):
               self._indent -= self._amount
-
+          
           def _print(self, node, extra=''):
               # extra = extra or '(' + ','.join([k for k, _ in ast.iter_fields(node)]) + ')'
               # print '|' + self._indent * '--', node.__class__.__name__ + extra
               pass
-
+          
           def _recurse(self, node):
               self._inc()
               for child in ast.iter_child_nodes(node):
                   self.visit(child)
               self._dec()
-
+          
           def nest(self, name):
               # print 'PUSH', self.task_functions, name
               self.task_functions.append(name)
-
+          
           def pop(self):
               # print 'POP', self.task_functions
               if len(self.task_functions) > 1:
                   self.task_functions.pop()
-
+          
           def _is_task(self, node):
               assert isinstance(node, ast.FunctionDef), type(node)
               for dec in node.decorator_list:
                   return dec.func.id == 'task'
-
-
+          
           def visit_FunctionDef(self, node):
               if self._is_task(node):
                   self._print(node, extra='(name=%s)' % node.name)
@@ -215,23 +216,21 @@
                   self.nest(node.name)
               self._recurse(node)
               self.pop()
-
+          
           def visit_Call(self, node):
               child = node.func.id
               self._print(node, extra='(f=%s)' % child)
               parent = self.task_functions[-1]
               assert parent in self.G, (parent, self.G.nodes())
-
+          
               if child in self.G.nodes():
                   self.G.add_edge(parent, child)
                   self.nest(child)
               self._recurse(node)
-
+          
               if child in self.G.nodes():
                   self.pop()
-              
-
-
+          
           def generic_visit(self, node):
               # self._print(node)
               self._recurse(node)
@@ -245,17 +244,13 @@
       svg = subprocess.check_output(['dot', '-Tsvg', dotfile])
       with open('images/workflow/prototype_callgraph.svg', 'w') as fd:
           fd.write(svg)
+
     #+END_SRC
 
-    #+RESULTS:
 
-
-    #+BEGIN_SRC sh :file images/workflow/prototype_callgraph.svg
-      python code/workflow/prototype_callgraph.py
-    #+END_SRC
-
-    #+RESULTS:
     [[file:images/workflow/prototype_callgraph.svg]]
+
+
 
 
 
