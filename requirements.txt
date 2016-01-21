@@ -2,3 +2,4 @@ pydot
 networkx
 futures
 astor
+traits
