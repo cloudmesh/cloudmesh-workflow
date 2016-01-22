@@ -6,6 +6,7 @@ from traits.api import HasTraits
 
 import networkx as nx
 import time
+import uuid
 from functools import wraps
 from concurrent import futures
 from multiprocessing import cpu_count
@@ -13,120 +14,130 @@ from multiprocessing import cpu_count
 
 Graph = nx.DiGraph
 
-DiGraphT = T.Trait(nx.DiGraph)
-ExecutorT = T.Trait(futures.Executor)
+TDiGraph = T.Trait(nx.DiGraph)
+TExecutor = T.Trait(futures.Executor)
 
 
-class Task(HasTraits):
-    G = DiGraphT()
-    executor = ExecutorT()
-    name = T.String()
+def nodeid(): return uuid.uuid4()
 
-    def __init__(self, fn, graph=None, executor=None):
-        self.function = fn
-        self.name = fn.func_name
 
-        if graph is not None:
-            self.G = graph
+class Edge:
+    AND = 'AND'
+    OR = 'OR'
 
-        if executor is not None:
-            self.executor = executor
+
+class Node(HasTraits):
+
+    id = T.Trait(uuid.UUID)
+    graph = T.Trait(Graph)
+    executor = T.Trait(futures.ThreadPoolExecutor)
+    timeout = T.Any()
+    f = T.Function()
+    result = T.Trait(futures.Future)
     
-    def __call__(self, *args, **kwargs):
-        future = self.executor.submit(self.function, *args, **kwargs)
-        self.G.add_node(self.function.func_name, future=future)
-        return future
+    def __init__(self, (f, args, kws), graph=None, executor=None, timeout=None):
+        self.id = nodeid()
+        self.f = f
+        self._args = args
+        self._kws = kws
+        self.graph = graph
+        self.executor = executor or futures.ThreadPoolExecutor(cpu_count())
+        self.timeout = timeout
 
 
-    def __add__(self, other):
-        assert self.G is not None
-        other.G = self.G
+    def start(self):
+        if self.result is None:
+            self.result = self.executor.submit(self.f, *self._args, **self._kws)
+        else:
+            # already started
+            pass
+
+
+    def combine(self, other, edge):
+
+        assert self.graph == other.graph
+        G = self.graph
+
+        s, t = self.id, nodeid()
+        other.id = t
+        G.add_node(s, node=self)
+        G.add_node(t, node=other)
+        G.add_edge(s, t, type=edge)
+
+        # self.start()
+        # other.start()
+
         return other
 
+
     def __and__(self, other):
+        return self.combine(other, Edge.AND)
 
-        # self.G and other.G reference the same object
-        G = self.G
 
-        # create a boundary
-        if self.name != '--BOUNDARY--' and other.name != '--BOUNDARY--':
-            b = boundary(G)
-            G.add_edge(self.function, b.function)
-            G.add_edge(other.function, b.function)
-            return b
+    def __or__(self, other):
+        return self.combine(other, Edge.OR)
 
-        # merge boundaries
-        elif self.name == '--BOUNDARY--' and other.name == '--BOUNDARY--':
-            incomming = G.predecessors(other.function)
-            G.remove_node(other.function)
-            for n in incomming:
-                G.add_edge(n, self.function)
-            return self
 
-        # either self or other is a boundary
-        else:
-            b = self if self.name == '--BOUNDARY--' else other
-            o = self if self.name != '--BOUNDARY--' else other
-            assert b.name == '--BOUNDARY--', b.name
-            assert o.name != '--BOUNDARY--', o.name
-            G.add_edge(o.function, b.function)
-            return b
+class delayed(object):
+    def __init__(self, G, **kws):
+        self.G = G
+        self.kws = kws
+
+    def __call__(self, f):
+
+        @wraps(f)
+        def g(*args, **kwargs):
+            return Node((f, args, kwargs),
+                        graph=self.G,
+                        **self.kws)
+
+        return g
 
 
 
-def boundary(graph):
-    def _boundary(): return
-    t = Task(_boundary, graph=graph)
-    t.name = '--BOUNDARY--'
-    return t
+G = Graph()
 
-
-def inject(graph, task, **kws):
-    task.G = graph
-    return task
-
-
-def task(fn):
-    return Task(fn)
-
-
-@task
+@delayed(G)
 def A():
-    for i in xrange(4):
-        # print 'A', i
-        time.sleep(5)
+    # for i in xrange(10):
+    #     print 'A', i
+    time.sleep(1)
 
-@task
+@delayed(G)
 def B():
-    for i in xrange(3):
-        # print 'B', i
-        time.sleep(2)
+    time.sleep(2)
 
-@task
+@delayed(G)
 def C():
-    for i in xrange(2):
-        time.sleep(4)
+    time.sleep(3)
 
 
-def main():
-    # g = namespace_get('.')
-    # g.add_node('START')
-    # g.add_edge('START', 'A')
-    # g.add_edge('START', 'B')
-    A()
-    B()
+def clean(G):
+    H = nx.convert_node_labels_to_integers(G)
+    N = {}
+    E = {}
 
+    for n in H.nodes():
+        node = H.node[n]['node']
+        del H.node[n]['node']
+        N[n] = node.f.func_name
 
-# main()
+        for s,t,data in H.out_edges([n], data=True):
+            E[s,t] = data['type']
 
-# while True:
-#     for n in G.nodes():
-#         print n, G.node[n]['future'].done()
-#     if all(map(lambda n: G.node[n]['future'].done(), G.nodes())):
-#         break
-#     else:
-#         time.sleep(2)
-#         print
+    return H, N, E
 
+def test():
+    A() | (B() & C())
+    H, N, E = clean(G)
 
-G = nx.DiGraph()
+    p = nx.spring_layout(H)
+    nx.draw_networkx(H, p, with_labels=False)
+    nx.draw_networkx_labels(H, p, N)
+    nx.draw_networkx_edge_labels(H, p, edge_labels=E)
+    import matplotlib.pyplot as plt
+    plt.savefig('/tmp/test.png')
+
+    # nx.write_dot(H, '/tmp/test.dot')
+
+test()
