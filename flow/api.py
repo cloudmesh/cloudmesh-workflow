@@ -22,8 +22,19 @@ def nodeid(): return uuid.uuid4()
 
 
 class Edge:
-    AND = 'AND'
-    OR = 'OR'
+    AND = '&'
+    OR = '|'
+
+
+def Dummy(graph, edge):
+    @delayed(graph)
+    def dummy():
+        return
+
+    node = dummy()
+    node.id = nodeid()
+    node.f.func_name = edge
+    return node
 
 
 class Node(HasTraits):
@@ -55,19 +66,27 @@ class Node(HasTraits):
 
     def combine(self, other, edge):
 
+        assert self.graph is not None
+        assert other.graph is not None
         assert self.graph == other.graph
         G = self.graph
 
-        s, t = self.id, nodeid()
-        other.id = t
-        G.add_node(s, node=self)
-        G.add_node(t, node=other)
-        G.add_edge(s, t, type=edge)
+        print self.f.func_name, edge, other.f.func_name
 
+        s, t = self.id, other.id
+        other.id = t
+        d = Dummy(G, edge)
+        G.add_node(d.id, node=d, label=edge)
+        G.add_node(s, node=self, label=self.f.func_name)
+        G.add_node(t, node=other, label=other.f.func_name)
+        G.add_edge(d.id, s)
+        G.add_edge(d.id, t)
+
+        
         # self.start()
         # other.start()
 
-        return other
+        return d
 
 
     def __and__(self, other):
@@ -122,22 +141,23 @@ def clean(G):
         del H.node[n]['node']
         N[n] = node.f.func_name
 
-        for s,t,data in H.out_edges([n], data=True):
-            E[s,t] = data['type']
+        # for s,t,data in H.out_edges([n], data=True):
+        #     E[s,t] = data['type']
 
     return H, N, E
 
 def test():
-    A() | (B() & C())
+    # A() | (B() & C())
+    ((A() & B()) | C()) & (A() | C())
     H, N, E = clean(G)
 
-    p = nx.spring_layout(H)
-    nx.draw_networkx(H, p, with_labels=False)
-    nx.draw_networkx_labels(H, p, N)
-    nx.draw_networkx_edge_labels(H, p, edge_labels=E)
-    import matplotlib.pyplot as plt
-    plt.savefig('/tmp/test.png')
+    # p = nx.spring_layout(H)
+    # nx.draw_networkx(H, p, with_labels=False)
+    # nx.draw_networkx_labels(H, p, N)
+    # nx.draw_networkx_edge_labels(H, p, edge_labels=E)
+    # import matplotlib.pyplot as plt
+    # plt.savefig('/tmp/test.png')
 
-    # nx.write_dot(H, '/tmp/test.dot')
+    nx.write_dot(H, '/tmp/test.dot')
 
 test()
