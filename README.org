@@ -257,6 +257,26 @@
 
 
 
-
-
 ** Dynamic vs Strict call-graph
+
+
+** Operator Overloading
+
+   Consider the simplified problem of processing the expression:
+
+   #+BEGIN_EXAMPLE
+   (A | B) ; C
+   #+END_EXAMPLE
+
+   Using similar syntax to build the DAG can be done in Python by
+   overloading the bitwise =AND= and =OR= operators:
+
+   #+BEGIN_SRC python
+     class Node(object):
+
+     def __and__(self, other):
+         return self.compose(other, AndNode)
+
+     def __or__(self, other):
+         return self.compose(other, OrNode)
+   #+END_SRC
