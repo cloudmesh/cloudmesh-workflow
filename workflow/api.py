@@ -29,6 +29,23 @@ class NodeType:
     COMPUTE = 'C'
     OPERATOR = 'O'
 
+
+class delayed(object):
+    def __init__(self, G, **kws):
+        self.G = G
+        self.kws = kws
+
+    def __call__(self, f):
+
+        @wraps(f)
+        def g(*args, **kwargs):
+            return Node((f, args, kwargs),
+                        graph=self.G,
+                        **self.kws)
+
+        return g
+
+
 def OpNode(graph, operator):
     node = Node((lambda:None, (), {}), graph=graph, type=NodeType.OPERATOR)
     node.id = nodeid()
@@ -92,23 +109,6 @@ class Node(HasTraits):
 
     def __or__(self, other):
         return self.compose(other, Operator.OR)
-
-
-class delayed(object):
-    def __init__(self, G, **kws):
-        self.G = G
-        self.kws = kws
-
-    def __call__(self, f):
-
-        @wraps(f)
-        def g(*args, **kwargs):
-            return Node((f, args, kwargs),
-                        graph=self.G,
-                        **self.kws)
-
-        return g
-
 
 
 G = Graph()
