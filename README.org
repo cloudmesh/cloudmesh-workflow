@@ -10,6 +10,8 @@
 
   - [[https://github.com/cloudmesh/task][cloudmesh_task]]
   - [[http://www.celeryproject.org/][celery]]
+  - [[https://pythonhosted.org/futures/][futures]]: backport of Python 3's =concurrent.futures= module to
+    Python 2
   - [[http://ccl.cse.nd.edu/software/workqueue/][Work Queue]]
   - [[https://bitbucket.org/rfc1437/lazypy/][lazypy]]: a python promises framework
     Provides:
