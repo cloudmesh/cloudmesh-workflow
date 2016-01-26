@@ -20,19 +20,10 @@ class Graph(nx.DiGraph):
     adjlist_dict_factory = OrderedDict
 
 
-TDiGraph = T.Trait(nx.DiGraph)
 TExecutor = T.Trait(futures.Executor)
 
 
 def nodeid(): return uuid.uuid4()
-
-class Operator:
-    AND = '&'
-    OR = '|'
-
-class NodeType:
-    COMPUTE = 'C'
-    OPERATOR = 'O'
 
 
 class delayed(object):
@@ -68,7 +59,6 @@ class Node(HasTraits):
     f = T.Function()
     name = T.String()
     result = T.Trait(futures.Future)
-    type = T.String()
     
     def __init__(self, (f, args, kws), graph=None, executor=None,
                  timeout=None, type=None):
@@ -80,7 +70,6 @@ class Node(HasTraits):
         self.graph = graph
         self.executor = executor or futures.ThreadPoolExecutor(cpu_count())
         self.timeout = timeout
-        self.type = type or NodeType.COMPUTE
 
 
     @property
