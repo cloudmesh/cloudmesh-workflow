@@ -21,19 +21,18 @@ TExecutor = T.Trait(futures.Executor)
 def nodeid(): return uuid.uuid4()
 
 
-class Edge:
+class Operator:
     AND = '&'
     OR = '|'
 
+class NodeType:
+    COMPUTE = 'C'
+    OPERATOR = 'O'
 
-def Dummy(graph, edge):
-    @delayed(graph)
-    def dummy():
-        return
-
-    node = dummy()
+def OpNode(graph, operator):
+    node = Node((lambda:None, (), {}), graph=graph, type=NodeType.OPERATOR)
     node.id = nodeid()
-    node.f.func_name = edge
+    node.f.func_name = operator
     return node
 
 
@@ -45,8 +44,9 @@ class Node(HasTraits):
     timeout = T.Any()
     f = T.Function()
     result = T.Trait(futures.Future)
+    type = T.String()
     
-    def __init__(self, (f, args, kws), graph=None, executor=None, timeout=None):
+    def __init__(self, (f, args, kws), graph=None, executor=None, timeout=None, type=None):
         self.id = nodeid()
         self.f = f
         self._args = args
@@ -54,6 +54,7 @@ class Node(HasTraits):
         self.graph = graph
         self.executor = executor or futures.ThreadPoolExecutor(cpu_count())
         self.timeout = timeout
+        self.type = type or NodeType.COMPUTE
 
 
     def start(self):
@@ -64,37 +65,33 @@ class Node(HasTraits):
             pass
 
 
-    def combine(self, other, edge):
+    def compose(self, other, operator):
 
         assert self.graph is not None
         assert other.graph is not None
         assert self.graph == other.graph
         G = self.graph
 
-        print self.f.func_name, edge, other.f.func_name
+        print self.f.func_name, operator, other.f.func_name
 
         s, t = self.id, other.id
         other.id = t
-        d = Dummy(G, edge)
-        G.add_node(d.id, node=d, label=edge)
+        op = OpNode(G, operator)
+        G.add_node(op.id, node=op, label=operator)
         G.add_node(s, node=self, label=self.f.func_name)
         G.add_node(t, node=other, label=other.f.func_name)
-        G.add_edge(d.id, s)
-        G.add_edge(d.id, t)
+        G.add_edge(op.id, s)
+        G.add_edge(op.id, t)
 
-        
-        # self.start()
-        # other.start()
-
-        return d
+        return op
 
 
     def __and__(self, other):
-        return self.combine(other, Edge.AND)
+        return self.compose(other, Operator.AND)
 
 
     def __or__(self, other):
-        return self.combine(other, Edge.OR)
+        return self.compose(other, Operator.OR)
 
 
 class delayed(object):
