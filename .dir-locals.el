@@ -1,1 +1,1 @@
-((python-mode . ((project-venv-name . "python-workflow"))))
+((python-mode . ((project-venv-name . "workflow"))))
