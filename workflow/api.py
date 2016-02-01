@@ -114,10 +114,27 @@ class Graph(nx.DiGraph):
 TExecutor = T.Trait(futures.Executor)
 
 
-def nodeid(): return uuid.uuid4()
+def nodeid():
+    """Generate a new node id
+
+    :returns: node id
+    :rtype: :class:`uuid.UUID`
+
+    """
+
+    return uuid.uuid4()
 
 
 class delayed(object):
+    """A :class:`delayed` is a decorator that delays evaluation of a function
+    until explicitly called for using :func:`evaluate`.
+
+    Intended usage: decorate a function such that :func:`__call__`ing
+    it returns a :class:`Node` instance that can be combined with
+    other :class:`Node` instances using the bitwise :func:`__and__`
+    and :func:`__or__` operators to create a workflow.
+    """
+
     def __init__(self, graph=None, **kws):
         self.G = graph
         self.kws = kws
@@ -134,7 +151,12 @@ class delayed(object):
 
 
 def find_root_node(graph):
-    """Graph -> Node"""
+    """Graph -> Node
+
+    Find the root node of a connected DAG
+
+    :rtype: :class:`Node`
+    """
 
     i = nx.topological_sort(graph)[0]
     n = graph.node[i]['node']
@@ -142,23 +164,85 @@ def find_root_node(graph):
 
 
 def evaluate(graph):
+    """Graph -> IO ()
 
+    Starting from the root node, evaluate the branches.
+    The graph nodes are updated in-place.
+    """
+
+    # FIXME assert componenets(graph) == 1
     node = find_root_node(graph)
-    return node.eval()
+    node.eval()
 
 
 class Node(HasTraits):
+    """A node in the :class:`Graph` and associated state.
+
+    :class:`Node`s can be composed using bitwise :func:`__and__` and
+    :func:`__or__` operators to denote sequential or parallel
+    evaluation order, respectively.
+
+    For example, give ``A``, ``B``, and ``C`` functions that have been
+    lifted to a :class:`Node` type (eg through the :class:`delayed`
+    decorator ``@delayed()`), to evaluate ``A`` and ``B`` in parallel,
+    then ``C``:
+
+    .. code-block:: python
+
+      G = (  (A(argA0, argA1) | B()) & C(argC)  ).graph
+
+    will create the call-:class:`Graph` ``G``.
+    In order to evaluate ``G``:
+
+    ::
+      evaluate(G)
+
+    """
 
     id = T.Trait(uuid.UUID)
+    """The node id. This is also the key to find the node in the
+    class:`Graph`."""
+
     graph = T.Trait(Graph)
+    """The call :class:`Graph` in which the node is located"""
+
     executor = T.Trait(futures.ThreadPoolExecutor)
+    """The execution context for evaluating this node (see eg
+    :class:`futures.ThreadPoolExecutor`)"""
+
     timeout = T.Any()
+    """How long to wait for execution to complete. See also
+    :func:`futures.Future.result`."""
+
     f = T.Function()
+    """The function to evaluate"""
+
     name = T.String()
+    """Name of the function (short for ``self.f.func_name``"""
+
     result = T.Trait(futures.Future)
+    """The :class:`futures.Future` containing result of the evaluation."""
     
     def __init__(self, (f, args, kws), graph=None, executor=None,
                  timeout=None, type=None):
+        """Create a :class:`Node` to evaluate a function ``f`` in some
+        ``graph`` using a given ``executor``
+
+        :param (f, args, kws): the function to evaluate (any
+                               callabled) along with positional and
+                               keywork arguments.
+
+        :param graph: The :class:`Graph` in which to insert the node
+                      upon composition with others. A value of
+                      ``None`` will create a new graph. When composed
+                      with another node in a different
+                      :func:`Node.graph` the two graphs with be
+                      merged.
+
+        :param executor: a :class:`futures.Executor` instance
+        :param timeout: seconds (float or int) to wait.
+        :param type: FIXME
+        """
         self.id = nodeid()
         self.f = f
         self._args = args
@@ -170,6 +254,12 @@ class Node(HasTraits):
 
 
     def _init_graph(self, graph=None):
+        """Initialize the `graph` attribute
+
+        Create a :class:`Graph` for this node if necessary.
+
+        :param graph: the :class:`Graph` to use if ours is ``None``
+        """
         if self.graph is None and graph is None:
             self.graph = Graph()
 
@@ -178,6 +268,14 @@ class Node(HasTraits):
 
 
     def _merge_graph(self, other):
+        """Combine this :class:`Node`'s graph with ``other``'s :class:`Graph`.
+
+        .. node::
+          This updates ``this.graph`` **in-place**
+
+        :param other: another instance of :class:`Node`
+        """
+
         if not self.graph == other.graph:
             for s, t, data in other.graph.edges_iter(data=True):
                 sn = other.graph.node[s]
@@ -190,6 +288,14 @@ class Node(HasTraits):
 
     @property
     def children_iter(self):
+        """Generator of :class:`Node`s
+
+        This ``yield``'s all the children :class:`Node`s of this node.
+
+        :returns: Child nodes of this node.
+        :rtype: generator of :class:`Node`
+        """
+
         edges = set(self.graph.edges())
         for i in self.graph.successors_iter(self.id):
             child = self.graph.node[i]['node']
@@ -198,10 +304,24 @@ class Node(HasTraits):
 
     @property
     def children(self):
+        """[:class:`Node`]
+
+        The children of this node.
+        See :func:`Node.children_iter`
+
+        :rtype: list of :class:`Node`
+        """
         return list(self.children_iter)
 
 
     def start(self):
+        """Start evaluating this node
+
+        Start evaluating this nodes function ``self.f`` if it hasn't
+        already started.
+        """
+        
+
         if self.result is None:
             self.result = self.executor.submit(self.f, *self._args, **self._kws)
         else:
@@ -210,16 +330,36 @@ class Node(HasTraits):
 
 
     def wait(self):
+        """Wait for this node to finish evaluating
+
+        This may timeout if :func:`Node.timeout` is specified.
+        """
         self.result.result(self.timeout)
 
 
     def eval(self):
+        """Start and wait for a node."""
         self.start()
         self.wait()
 
 
     def compose(self, other, MkOpNode):
+        """Compose this :class:`Node` with another :class:`Node`.
 
+        Two :class:`Node`s are composed using a proxy :class:`OpNode`.
+        The :class:`OpNode` defines the evaluation semantics of its
+        child nodes (eg sequantial or parallel).
+
+        :param other: a :class:`Node`
+
+        :param MkOpNode: a callable with keyword arg
+                        ``graph``constructor for the proxy node
+
+        :returns: The proxy node with this node and ``other`` node as
+                  children
+
+        :rtype: :class:`OpNode`
+        """
 
         self._init_graph()
         other._init_graph(self.graph)
@@ -245,26 +385,71 @@ class Node(HasTraits):
 
 
     def __and__(self, other):
+        """Sequential composition
+
+        :param other: the :class:`Node` to evaluate **after** this
+                      :class:`Node`
+
+        :returns: the node composition (see :func:`Node.compose`)
+        :rtype: :class:`OpNode`
+
+        """
+
         return self.compose(other, AndNode)
 
 
     def __or__(self, other):
+        """Parallel composition
+
+        :param other: The :class:`Node to evaluate along with this
+                      :class:`Node`.
+
+        :returns: the node composition (see :func:`Node.compose`)
+        :rtype: :class:`OpNode`
+
+        """
+
         return self.compose(other, OrNode)
 
 
 
 class OpNode(Node):
+    """A proxy node defining the evaluation semantics of its children
+    :class:`Node`s
+
+    Intended usage: this class it not intended to be instantiated
+    directly. Rather, classes should inherit from :class:`OpNode` to
+    defined the desired semantics.
+
+    """
 
     def __init__(self, **kwargs):
         n = self.name
         super(OpNode, self).__init__((lambda: None, (), {}), **kwargs)
         self.name = n
 
+
 class AndNode(OpNode):
+    """Sequential evaluation semantics.
+
+    Children of :class:`AndNode` will be evaluated in the order in
+    which they were added as children of this node.
+
+    """
+
+    # Implementation notes:
+    #
+    # Evaluation order is enforced by only sparking the first child in
+    # the call to `start`. This will allow evaluation to be sparked on
+    # any grandhildren of this node according to their respecitve
+    # semantics. Any other children will be evaluted in the `wait`
+    # function sequentially.
+
 
     name = T.String('&')
 
     def start(self):
+
         for child in self.children_iter:
             child.start()
             break
@@ -279,6 +464,17 @@ class AndNode(OpNode):
 
 
 class OrNode(OpNode):
+    """Parallel evaluation semantics
+
+    Children of :class:`OrNode` will be evaluated in parallel, sparked
+    in the order in which they were added as children of this node.
+
+    """
+
+    # Implementation notes:
+    #
+    # Evaluation is done by sparking all children, then waiting for
+    # all children.
 
     name = T.String('|')
 
