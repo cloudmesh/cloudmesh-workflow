@@ -42,11 +42,17 @@ class delayed(object):
         return g
 
 
+def find_root_node(graph):
+    """Graph -> Node"""
+
+    i = nx.topological_sort(graph)[0]
+    n = graph.node[i]['node']
+    return n
+
 
 def evaluate(graph):
 
-    s = nx.topological_sort(graph)[0]
-    node = graph.node[s]['node']
+    node = find_root_node(graph)
     return node.eval()
 
 
@@ -228,7 +234,7 @@ def F():
 
 
 def clean(G):
-    H = G.copy() # nx.convert_node_labels_to_integers(G)
+    H = G.copy()
     N = {}
     E = {}
 
@@ -237,8 +243,6 @@ def clean(G):
         del H.node[n]['node']
         N[n] = node.name
 
-        # for s,t,data in H.out_edges([n], data=True):
-        #     E[s,t] = data['type']
 
     return H, N, E
 
@@ -250,29 +254,8 @@ def test():
     node = (A() | B() | C()) & (D() | F())
 
     G = node.graph
-
     H, N, E = clean(G)
-
-
     evaluate(G)
-
-    # O = Graph()
-    # order = nx.topological_sort(H)
-    # s = order[0]
-    # O.add_node(s, label=G.node[s]['label'])
-    # for t in order[1:]:
-    #     O.add_node(t, label=G.node[t]['label'])
-    #     O.add_edge(s, t)
-    #     s = t
-
-    # p = nx.spring_layout(H)
-    # nx.draw_networkx(H, p, with_labels=False)
-    # nx.draw_networkx_labels(H, p, N)
-    # nx.draw_networkx_edge_labels(H, p, edge_labels=E)
-    # import matplotlib.pyplot as plt
-    # plt.savefig('/tmp/test.png')
-
     nx.write_dot(H, '/tmp/test.dot')
-    # nx.write_dot(O, '/tmp/testo.dot')
 
 test()
