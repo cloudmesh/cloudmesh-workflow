@@ -1,3 +1,88 @@
+#
+# Copyright 2016 Badi' Abdul-Wahid
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+# Author: Badi' Abdul-Wahid <badi@iu.edu>
+# Organization: Indiana University / FutureSystems
+#
+
+
+"""\n
+Description
+===========
+
+This module provides an api for building a workflow graph of labeled
+functions which can then be evaluated. Nodes connected with a desired
+ordering or run sequentially, others can be run in parallel.
+
+Syntax is inspired by the parallel (||) and sequential (;) operators.
+For example:
+
+::
+
+  (A || B) ; (C || D)
+
+means that A and B can be evaluated in parallel, and likewise C and D,
+but both A and B must be completed before C or D may begin.
+
+The python implementation overrides the bitwise **OR** (|) and **AND**
+(&) operators to provide a similar syntactic feel. The example above
+should be defined as such:
+
+::
+
+  (A() | B()) & (C() | D())
+
+.. note::
+
+  The python operator precedence for ``|`` and ``&`` is unchanged:
+  ``&`` has higher precedence than ``|``.
+
+Usage
+=====
+
+The first part is to mark top-level functions as ``delayed()``.  The
+``delayed()`` decoration wraps the function so that calling the
+function inserts the node, without applying the parameters, into the
+call graph. You can access the ``graph`` property of any node to get
+the current call graph.
+
+For instance
+
+.. code-block :: python
+
+  @delayed()
+  def A(x): print x*2
+
+  @delayed()
+  def B(x, y): return x ** y
+
+  def main():
+    node = A(24) | B(40, 2)
+
+
+Once the graph has been built, it must be explicitly evaluated
+
+.. code-block :: python
+
+  evaluate(node.graph)
+
+
+"""
+
+
 
 from __future__ import absolute_import
 
