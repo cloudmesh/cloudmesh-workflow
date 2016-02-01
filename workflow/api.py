@@ -349,4 +349,5 @@ def test():
     evaluate(G)
     nx.write_dot(H, '/tmp/test.dot')
 
-test()
+if __name__ == '__main__':
+    test()
