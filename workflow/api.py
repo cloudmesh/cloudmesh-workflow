@@ -19,7 +19,23 @@
 #
 
 
-"""\n
+
+
+from __future__ import absolute_import
+
+import traits.api as T
+from traits.api import HasTraits
+
+import networkx as nx
+import time
+import uuid
+from functools import wraps
+from concurrent import futures
+from multiprocessing import cpu_count
+from collections import OrderedDict
+
+
+__doc__ = """\
 Description
 ===========
 
@@ -53,11 +69,11 @@ should be defined as such:
 Usage
 =====
 
-The first part is to mark top-level functions as ``delayed()``.  The
-``delayed()`` decoration wraps the function so that calling the
-function inserts the node, without applying the parameters, into the
-call graph. You can access the ``graph`` property of any node to get
-the current call graph.
+The first part is to mark top-level functions as :func:`delayed`.  The
+``@delayed()`` decoration wraps the function so that calling the
+function inserts the :class:`Node`, without applying the parameters,
+into the call :class:`Graph`. You can access the ``graph`` property of
+any node to get the current call graph.
 
 For instance
 
@@ -79,23 +95,9 @@ Once the graph has been built, it must be explicitly evaluated
 
   evaluate(node.graph)
 
-
 """
 
 
-
-from __future__ import absolute_import
-
-import traits.api as T
-from traits.api import HasTraits
-
-import networkx as nx
-import time
-import uuid
-from functools import wraps
-from concurrent import futures
-from multiprocessing import cpu_count
-from collections import OrderedDict
 
 
 __all__ = [
@@ -104,8 +106,10 @@ __all__ = [
 ]
 
 class Graph(nx.DiGraph):
-    """A NetworkX DiGraph where the ordering of edges/nodes is
-    preserved"""
+    """A NetworkX :func:`networkx.DiGraph` where the ordering of edges/nodes is
+    preserved
+
+    """
 
     node_dict_factory = OrderedDict
     adjlist_dict_factory = OrderedDict
@@ -129,10 +133,11 @@ class delayed(object):
     """A :class:`delayed` is a decorator that delays evaluation of a function
     until explicitly called for using :func:`evaluate`.
 
-    Intended usage: decorate a function such that :func:`__call__`ing
-    it returns a :class:`Node` instance that can be combined with
-    other :class:`Node` instances using the bitwise :func:`__and__`
-    and :func:`__or__` operators to create a workflow.
+    Intended usage: decorate a function such that :meth:`~object.__call__`\
+    ing it returns a :class:`Node` instance that can be combined with
+    other :class:`Node` instances using the bitwise :meth:`~object.__and__`
+    (``&``) and :meth:`~object.__or__` (``|``) operators to create a workflow.
+
     """
 
     def __init__(self, graph=None, **kws):
@@ -151,7 +156,7 @@ class delayed(object):
 
 
 def find_root_node(graph):
-    """Graph -> Node
+    """:class:`Graph` -> :class:`Node`
 
     Find the root node of a connected DAG
 
@@ -164,7 +169,7 @@ def find_root_node(graph):
 
 
 def evaluate(graph):
-    """Graph -> IO ()
+    """:class:`Graph` -> IO ()
 
     Starting from the root node, evaluate the branches.
     The graph nodes are updated in-place.
@@ -178,50 +183,61 @@ def evaluate(graph):
 class Node(HasTraits):
     """A node in the :class:`Graph` and associated state.
 
-    :class:`Node`s can be composed using bitwise :func:`__and__` and
-    :func:`__or__` operators to denote sequential or parallel
+    :class:`Node`\ s can be composed using bitwise :meth:`~object.__and__` and
+    :meth:`~object.__or__` operators to denote sequential or parallel
     evaluation order, respectively.
 
     For example, give ``A``, ``B``, and ``C`` functions that have been
     lifted to a :class:`Node` type (eg through the :class:`delayed`
-    decorator ``@delayed()`), to evaluate ``A`` and ``B`` in parallel,
+    decorator ``@delayed()``), to evaluate ``A`` and ``B`` in parallel,
     then ``C``:
 
     .. code-block:: python
 
       G = (  (A(argA0, argA1) | B()) & C(argC)  ).graph
 
-    will create the call-:class:`Graph` ``G``.
+    will create the call :class:`Graph` ``G``.
     In order to evaluate ``G``:
 
-    ::
+    .. code-block:: python
+
       evaluate(G)
 
     """
 
     id = T.Trait(uuid.UUID)
     """The node id. This is also the key to find the node in the
-    class:`Graph`."""
+    :class:`Graph`."""
 
     graph = T.Trait(Graph)
     """The call :class:`Graph` in which the node is located"""
 
     executor = T.Trait(futures.ThreadPoolExecutor)
     """The execution context for evaluating this node (see eg
-    :class:`futures.ThreadPoolExecutor`)"""
+    :class:`~concurrent.futures.ThreadPoolExecutor`)
+
+    """
 
     timeout = T.Any()
     """How long to wait for execution to complete. See also
-    :func:`futures.Future.result`."""
+    :meth:`~concurrent.futures.Future.result`.
+
+    """
 
     f = T.Function()
     """The function to evaluate"""
 
     name = T.String()
-    """Name of the function (short for ``self.f.func_name``"""
+    """Name of the function, usually short for ``self.f.func_name``"""
 
     result = T.Trait(futures.Future)
-    """The :class:`futures.Future` containing result of the evaluation."""
+    # The explicit link to `Future` is done because intersphince does
+    # not find it
+    """The concurrent.futures.Future_ containing result of the evaluation.
+
+    .. _concurrent.futures.Future: https://pythonhosted.org/futures/index.html#future-objects
+
+    """
     
     def __init__(self, (f, args, kws), graph=None, executor=None,
                  timeout=None, type=None):
@@ -288,9 +304,9 @@ class Node(HasTraits):
 
     @property
     def children_iter(self):
-        """Generator of :class:`Node`s
+        """Generator of :class:`Node`\ s
 
-        This ``yield``'s all the children :class:`Node`s of this node.
+        This ``yield``'s all the children :class:`Node`\ s of this node.
 
         :returns: Child nodes of this node.
         :rtype: generator of :class:`Node`
@@ -344,21 +360,22 @@ class Node(HasTraits):
 
 
     def compose(self, other, MkOpNode):
-        """Compose this :class:`Node` with another :class:`Node`.
+        """Compose this :class:`Node` with another Node.
 
-        Two :class:`Node`s are composed using a proxy :class:`OpNode`.
-        The :class:`OpNode` defines the evaluation semantics of its
-        child nodes (eg sequantial or parallel).
+        Two Nodes are composed using a proxy :class:`OpNode`.  The
+        OpNode defines the evaluation semantics of its child nodes (eg
+        sequantial or parallel).
 
         :param other: a :class:`Node`
 
-        :param MkOpNode: a callable with keyword arg
-                        ``graph``constructor for the proxy node
+        :param MkOpNode: a callable with keyword arg graph constructor
+                         for the proxy node
 
-        :returns: The proxy node with this node and ``other`` node as
+        :returns: The proxy node with this node and other node as
                   children
 
         :rtype: :class:`OpNode`
+
         """
 
         self._init_graph()
@@ -415,7 +432,7 @@ class Node(HasTraits):
 
 class OpNode(Node):
     """A proxy node defining the evaluation semantics of its children
-    :class:`Node`s
+    :class:`Node`\ s
 
     Intended usage: this class it not intended to be instantiated
     directly. Rather, classes should inherit from :class:`OpNode` to
