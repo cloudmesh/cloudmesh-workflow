@@ -27,8 +27,8 @@ def nodeid(): return uuid.uuid4()
 
 
 class delayed(object):
-    def __init__(self, G, **kws):
-        self.G = G
+    def __init__(self, graph=None, **kws):
+        self.G = graph
         self.kws = kws
 
     def __call__(self, f):
@@ -72,6 +72,25 @@ class Node(HasTraits):
         self.timeout = timeout
 
 
+    def _init_graph(self, graph=None):
+        if self.graph is None and graph is None:
+            self.graph = Graph()
+
+        elif self.graph is None and graph is not None:
+            self.graph = graph
+
+
+    def _merge_graph(self, other):
+        if not self.graph == other.graph:
+            for s, t, data in other.graph.edges_iter(data=True):
+                sn = other.graph.node[s]
+                tn = other.graph.node[t]
+                self.graph.add_node(s, sn)
+                self.graph.add_node(t, tn)
+                self.graph.add_edge(s, t, data)
+            other.graph = self.graph
+
+
     @property
     def children_iter(self):
         edges = set(self.graph.edges())
@@ -104,8 +123,13 @@ class Node(HasTraits):
 
     def compose(self, other, MkOpNode):
 
-        assert self.graph is not None
-        assert other.graph is not None
+
+        self._init_graph()
+        other._init_graph(self.graph)
+        self._merge_graph(other)
+
+        assert self.graph is not None, self.name
+        assert other.graph is not None, other.name
         assert self.graph == other.graph
         G = self.graph
 
@@ -170,9 +194,7 @@ class OrNode(OpNode):
             child.wait()
 
 
-G = Graph()
-
-@delayed(G)
+@delayed()
 def A():
     print 'A START'
     # for i in xrange(10):
@@ -180,25 +202,25 @@ def A():
     time.sleep(3)
     # print 'A STOP'
 
-@delayed(G)
+@delayed()
 def B():
     print 'B START'
     time.sleep(3)
     # print 'B STOP'
 
-@delayed(G)
+@delayed()
 def C():
     print 'C START'
     time.sleep(3)
     # print 'C STOP'
 
-@delayed(G)
+@delayed()
 def D():
     print 'D START'
     time.sleep(3)
     # print 'D STOP'
 
-@delayed(G)
+@delayed()
 def F():
     print 'F START'
     time.sleep(3)
@@ -221,11 +243,13 @@ def clean(G):
     return H, N, E
 
 def test():
-    # A() | B() | C()
-    # A() & B() | C()
-    # A() | (B() & C())
-    # ((A() & B()) | C()) & (D() | F())
-    (A() | B() | C()) & (D() | F())
+    # node = ( A() | B() | C() )
+    # node = ( A() & B() | C() )
+    # node = ( A() | (B() & C()) )
+    # node = ( ((A() & B()) | C()) & (D() | F()) )
+    node = (A() | B() | C()) & (D() | F())
+
+    G = node.graph
 
     H, N, E = clean(G)
 
