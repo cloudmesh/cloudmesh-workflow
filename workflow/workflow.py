@@ -271,7 +271,7 @@ def evaluate(graph):
     The graph nodes are updated in-place.
     """
 
-    # FIXME assert componenets(graph) == 1
+    assert nx.is_weakly_connected(graph)
     node = find_root_node(graph)
     node.eval()
 
