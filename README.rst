@@ -42,8 +42,7 @@ See ReadTheDocs:
  License
 =========
 
-See `LICENSE <https://github.com/cloudmesh/workflow/blog/master/LICENSE>`_
-
+See `LICENSE <https://github.com/cloudmesh/workflow/blob/master/LICENSE>`_
 
 
 .. |unstable| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=unstable
