@@ -271,7 +271,7 @@ def evaluate(graph):
     The graph nodes are updated in-place.
     """
 
-    # FIXME assert componenets(graph) == 1
+    assert nx.is_weakly_connected(graph)
     node = find_root_node(graph)
     node.eval()
 
@@ -318,7 +318,7 @@ class Node(HasTraits):
 
     """
 
-    timeout = T.Int()
+    timeout = T.Any()
     """(:class:`int`) How long to wait for execution to complete. See also
     :meth:`~concurrent.futures.Future.result`.
 
