@@ -299,3 +299,4 @@ intersphinx_mapping= {'python': ('https://docs.python.org/', None),
                       ('https://networkx.github.io/documentation/latest/',
                        None), }
 
+autoclass_content = 'both'

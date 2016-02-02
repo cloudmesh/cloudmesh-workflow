@@ -103,6 +103,7 @@ Once the graph has been built, it must be explicitly evaluated
 __all__ = [
     'delayed', 'evaluate',
     'Node', 'OpNode', 'AndNode', 'OrNode', 'Graph',
+    'find_root_node',
 ]
 
 class Graph(nx.DiGraph):
@@ -156,7 +157,9 @@ class delayed(object):
 
 
 def find_root_node(graph):
-    """:class:`Graph` -> :class:`Node`
+    """find_root_node(Graph) -> Node
+
+    :class:`Graph` -> :class:`Node`
 
     Find the root node of a connected DAG
 
@@ -169,7 +172,9 @@ def find_root_node(graph):
 
 
 def evaluate(graph):
-    """:class:`Graph` -> IO ()
+    """evaluate(Graph) -> None
+
+    :class:`Graph` -> IO ()
 
     Starting from the root node, evaluate the branches.
     The graph nodes are updated in-place.
@@ -240,13 +245,13 @@ class Node(HasTraits):
     """
     
     def __init__(self, (f, args, kws), graph=None, executor=None,
-                 timeout=None, type=None):
+                 timeout=None):
         """Create a :class:`Node` to evaluate a function ``f`` in some
         ``graph`` using a given ``executor``
 
-        :param (f, args, kws): the function to evaluate (any
-                               callabled) along with positional and
-                               keywork arguments.
+        :param func: f_args_kws = (f, args, kws) the function to
+                                  evaluate (any callable) along with
+                                  positional and keywork arguments.
 
         :param graph: The :class:`Graph` in which to insert the node
                       upon composition with others. A value of
@@ -257,7 +262,7 @@ class Node(HasTraits):
 
         :param executor: a :class:`futures.Executor` instance
         :param timeout: seconds (float or int) to wait.
-        :param type: FIXME
+
         """
         self.id = nodeid()
         self.f = f
