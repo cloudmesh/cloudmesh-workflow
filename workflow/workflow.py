@@ -36,6 +36,42 @@ from collections import OrderedDict
 
 
 __doc__ = """\
+Usage Summary
+=======
+
+1. Define delayed functions:
+
+.. code-block:: python
+
+  @delayed()
+  def A(foo):
+    time.sleep(42)
+    print foo
+
+  @delayed()
+  def B()
+    time.sleep(24)
+    print 'Boo!'
+
+  @delayed()
+  def C(x, y):
+    time.sleep(10)
+    return x ** y
+
+2. Compose the functions using ``|`` and ``&`` for parallel and
+   sequential evaluation:
+
+.. code-block:: python
+
+  root_node = (A('hello world!') | B()) & C(4, 2)
+
+3. Evaluate the resulting graph
+
+.. code-block:: python
+
+  evaluate(root_node.graph)
+
+  
 Description
 ===========
 
