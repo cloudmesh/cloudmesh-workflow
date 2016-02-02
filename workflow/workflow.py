@@ -208,7 +208,9 @@ TExecutor = T.Trait(futures.Executor)
 
 
 def nodeid():
-    """Generate a new node id
+    """nodeid() -> UUID
+
+    Generate a new node id
 
     :returns: node id
     :rtype: :class:`uuid.UUID`
@@ -234,6 +236,7 @@ class delayed(object):
         self.kws = kws
 
     def __call__(self, f):
+        """__call__(function) -> function(*args, **kws) -> Node"""
 
         @wraps(f)
         def g(*args, **kwargs):
@@ -299,34 +302,41 @@ class Node(HasTraits):
     """
 
     id = T.Trait(uuid.UUID)
-    """The node id. This is also the key to find the node in the
-    :class:`Graph`."""
+    """(:class:`~uuid.UUID`) The node id. This is also the key to find the
+    node in the :class:`Graph`.
+
+    """
 
     graph = T.Trait(Graph)
-    """The call :class:`Graph` in which the node is located"""
+    """(:class:`Graph`) The call :class:`Graph` in which the node is
+    located"""
 
-    executor = T.Trait(futures.ThreadPoolExecutor)
-    """The execution context for evaluating this node (see eg
+    executor = T.Trait(futures.Executor)
+    """(:class:`~concurrent.futures.Executor`) The execution context for
+    evaluating this node (see eg
     :class:`~concurrent.futures.ThreadPoolExecutor`)
 
     """
 
-    timeout = T.Any()
-    """How long to wait for execution to complete. See also
+    timeout = T.Int()
+    """(:class:`int`) How long to wait for execution to complete. See also
     :meth:`~concurrent.futures.Future.result`.
 
     """
 
     f = T.Function()
-    """The function to evaluate"""
+    """(:class:`~types.FunctionType`) The function to evaluate"""
 
     name = T.String()
-    """Name of the function, usually short for ``self.f.func_name``"""
+    """(:class:`str`) Name of the function, usually short for
+    ``self.f.func_name``
+
+    """
 
     result = T.Trait(futures.Future)
     # The explicit link to `Future` is done because intersphince does
     # not find it
-    """The concurrent.futures.Future_ containing result of the evaluation.
+    """(concurrent.futures.Future_) The result and status of evaluation.
 
     .. _concurrent.futures.Future: https://pythonhosted.org/futures/index.html#future-objects
 
@@ -424,10 +434,13 @@ class Node(HasTraits):
 
 
     def start(self):
-        """Start evaluating this node
+        """start() -> None
+
+        Start evaluating this node
 
         Start evaluating this nodes function ``self.f`` if it hasn't
         already started.
+
         """
         
 
@@ -439,21 +452,30 @@ class Node(HasTraits):
 
 
     def wait(self):
-        """Wait for this node to finish evaluating
+        """wait() -> None
 
-        This may timeout if :func:`Node.timeout` is specified.
+        Wait for this node to finish evaluating
+
+        This may timeout if :attr:`~Node.timeout` is specified.
+
         """
         self.result.result(self.timeout)
 
 
     def eval(self):
-        """Start and wait for a node."""
+        """eval() -> None
+
+        Start and wait for a node.
+
+        """
         self.start()
         self.wait()
 
 
     def compose(self, other, MkOpNode):
-        """Compose this :class:`Node` with another Node.
+        """compose(other, callable(graph=Graph)) -> OpNode
+
+        Compose this :class:`Node` with another :class:`Node`.
 
         Two Nodes are composed using a proxy :class:`OpNode`.  The
         OpNode defines the evaluation semantics of its child nodes (eg
@@ -464,10 +486,10 @@ class Node(HasTraits):
         :param MkOpNode: a callable with keyword arg graph constructor
                          for the proxy node
 
-        :returns: The proxy node with this node and other node as
-                  children
+        :returns: A new :class:`Node` with ``self`` and ``other`` and
+                  children.
 
-        :rtype: :class:`OpNode`
+        :rtype: :class:`Node`
 
         """
 
@@ -501,7 +523,7 @@ class Node(HasTraits):
                       :class:`Node`
 
         :returns: the node composition (see :func:`Node.compose`)
-        :rtype: :class:`OpNode`
+        :rtype: :class:`Node`
 
         """
 
@@ -515,7 +537,7 @@ class Node(HasTraits):
                       :class:`Node`.
 
         :returns: the node composition (see :func:`Node.compose`)
-        :rtype: :class:`OpNode`
+        :rtype: :class:`Node`
 
         """
 
