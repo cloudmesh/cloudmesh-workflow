@@ -131,6 +131,58 @@ Once the graph has been built, it must be explicitly evaluated
 
   evaluate(node.graph)
 
+Concepts
+========
+
+Deferring function evaluation
+-----------------------------
+
+A :class:`delayed` is intended to be used as a decorator to lift
+arbitrary functions to have delayed semantics. Evaluation semantics of
+:class:`delayed` objects is:
+
+1. calling a delayed function stores the arguments and returns a :class:`Node`.
+
+2. :class:`Node`\ s are composed using bitwise ``&`` and ``|``
+   operators to denote sequential and parallel evaluation order,
+   respectively.
+
+
+Composing :class:`Node`\ s for parallel/sequential semantics
+------------------------------------------------------------
+
+A :class:`Node` captures the evaluation state of a :class:`delayed`
+function. It provides several important attributes:
+
+1. :attr:`~Node.graph`\ : the evaluation graph in which the function
+   is located.
+
+2. :attr:`~Node.f`\ : the function to evaluate.
+
+3. :attr:`~Node.name`\ : the name of the node. Typically captured from
+   :attr:`~Node.f`, but may be a shorthand representation of
+   :class:`OpNode`.
+
+4. :attr:`~Node.result`\ : the status and result of the evaluation.
+
+
+:class:`Node`\ s are created by calling :class:`delayed` functions and
+then composed using ``&`` and ``|``. Each composition returns a new
+:class:`Node` in the graph.
+
+
+Evaluation of a delayed function
+--------------------------------
+
+Once :class:`Node`\ s have been composed to achieve the desired
+parallelism, evaluate the graph by calling :func:`evaluate` on the
+:attr:`~Node.graph` attribute of the composed node.
+
+
+
+API
+===
+
 """
 
 
