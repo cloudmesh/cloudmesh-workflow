@@ -318,7 +318,7 @@ class Node(HasTraits):
 
     """
 
-    timeout = T.Int()
+    timeout = T.Any()
     """(:class:`int`) How long to wait for execution to complete. See also
     :meth:`~concurrent.futures.Future.result`.
 
