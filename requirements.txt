@@ -3,7 +3,6 @@ networkx
 futures
 astor
 traits
-matplotlib
 sphinx
 sphinx_rtd_theme
 nose
