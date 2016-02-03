@@ -699,53 +699,59 @@ class OrNode(OpNode):
         self.result.set_result(None)
 
 
-@delayed()
-def A():
-    print 'A START'
-    # for i in xrange(10):
-    #     print 'A', i
-    time.sleep(3)
-    # print 'A STOP'
-
-@delayed()
-def B():
-    print 'B START'
-    time.sleep(3)
-    # print 'B STOP'
-
-@delayed()
-def C():
-    print 'C START'
-    time.sleep(3)
-    # print 'C STOP'
-
-@delayed()
-def D():
-    print 'D START'
-    time.sleep(3)
-    # print 'D STOP'
-
-@delayed()
-def F():
-    print 'F START'
-    time.sleep(3)
-    # print 'F STOP'
-
-
-def clean(G):
-    H = G.copy()
-    N = {}
-    E = {}
-
-    for n in H.nodes():
-        node = H.node[n]['node']
-        del H.node[n]['node']
-        N[n] = node.name
-
-
-    return H, N, E
+######################################################################
+## testing
+######################################################################
 
 def test():
+
+    @delayed()
+    def A():
+        print 'A START'
+        # for i in xrange(10):
+        #     print 'A', i
+        time.sleep(3)
+        # print 'A STOP'
+
+    @delayed()
+    def B():
+        print 'B START'
+        time.sleep(3)
+        # print 'B STOP'
+
+    @delayed()
+    def C():
+        print 'C START'
+        time.sleep(3)
+        # print 'C STOP'
+
+    @delayed()
+    def D():
+        print 'D START'
+        time.sleep(3)
+        # print 'D STOP'
+
+    @delayed()
+    def F():
+        print 'F START'
+        time.sleep(3)
+        # print 'F STOP'
+
+
+    def clean(G):
+        H = G.copy()
+        N = {}
+        E = {}
+
+        for n in H.nodes():
+            node = H.node[n]['node']
+            del H.node[n]['node']
+            N[n] = node.name
+
+
+        return H, N, E
+
+
     # node = ( A() | B() | C() )
     # node = ( A() & B() | C() )
     # node = ( A() | (B() & C()) )
