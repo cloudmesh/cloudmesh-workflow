@@ -61,7 +61,7 @@ Usage Summary
 
 >>> root_node = (A('hello world!') | B()) & C(4, 2)
 >>> root_node
-<workflow.workflow.AndNode object at ...>
+<cloudmesh_workflow.workflow.AndNode object at ...>
 
 3. Evaluate the resulting graph
 
@@ -251,7 +251,7 @@ class delayed(object):
     <type 'function'>
     >>> node = foo(1, 2) & foo(3, 4)
     >>> print node
-    <workflow.workflow.AndNode object at ...>
+    <cloudmesh_workflow.workflow.AndNode object at ...>
     >>> evaluate(node.graph)
     1
     2
@@ -639,7 +639,7 @@ class AndNode(OpNode):
     >>> @delayed()
     ... def foo(a): return 42
     >>> foo(42) & foo(24)
-    <workflow.workflow.AndNode object at ...>
+    <cloudmesh_workflow.workflow.AndNode object at ...>
 
     """
 
@@ -679,7 +679,7 @@ class OrNode(OpNode):
     >>> @delayed()
     ... def foo(a): return 42
     >>> foo(42) | foo(24)
-    <workflow.workflow.OrNode object at ...>
+    <cloudmesh_workflow.workflow.OrNode object at ...>
     """
 
     # Implementation notes:
