@@ -625,6 +625,7 @@ class OpNode(Node):
         n = self.name
         super(OpNode, self).__init__((lambda: None, (), {}), **kwargs)
         self.name = n
+        self.result = futures.Future()
 
 
 class AndNode(OpNode):
@@ -661,7 +662,6 @@ class AndNode(OpNode):
 
 
     def wait(self):
-        self.result = futures.Future()
         for child in self.children_iter:
             child.start()
             child.wait()
@@ -696,6 +696,7 @@ class OrNode(OpNode):
     def wait(self):
         for child in self.children_iter:
             child.wait()
+        self.result.set_result(None)
 
 
 @delayed()
