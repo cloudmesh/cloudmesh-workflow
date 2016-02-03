@@ -41,35 +41,33 @@ Usage Summary
 
 1. Define delayed functions:
 
-.. code-block:: python
 
-  @delayed()
-  def A(foo):
-    time.sleep(42)
-    print foo
+>>> @delayed()
+... def A(foo):
+...   time.sleep(0.05)
+...   print foo
+>>>
+>>> @delayed()
+... def B():
+...   print 'Boo!'
+>>>
+>>> @delayed()
+... def C(x, y):
+...   return x ** y
 
-  @delayed()
-  def B()
-    time.sleep(24)
-    print 'Boo!'
-
-  @delayed()
-  def C(x, y):
-    time.sleep(10)
-    return x ** y
 
 2. Compose the functions using ``|`` and ``&`` for parallel and
    sequential evaluation:
 
-.. code-block:: python
-
-  root_node = (A('hello world!') | B()) & C(4, 2)
+>>> root_node = (A('hello world!') | B()) & C(4, 2)
+>>> root_node
+<workflow.workflow.AndNode object at ...>
 
 3. Evaluate the resulting graph
 
-.. code-block:: python
-
-  evaluate(root_node.graph)
+>>> evaluate(root_node.graph)
+Boo!
+hello world!
 
   
 Description
@@ -111,25 +109,35 @@ function inserts the :class:`Node`, without applying the parameters,
 into the call :class:`Graph`. You can access the ``graph`` property of
 any node to get the current call graph.
 
-For instance
+For example, define two delayed functions ``A`` and ``B``:
 
-.. code-block :: python
+>>> @delayed()
+... def A(x):
+...   return x*2
 
-  @delayed()
-  def A(x): print x*2
+>>> @delayed()
+... def B(x, y):
+...   return x ** y
 
-  @delayed()
-  def B(x, y): return x ** y
+Compose ``A`` and ``B`` to run in parallel
 
-  def main():
-    node = A(24) | B(40, 2)
+>>> node = A(24) | B(40, 2)
+
+Evaluate the graph:
+
+>>> evaluate(node.graph)
+
+Print the results:
+
+>>> for _, data in node.graph.nodes(data=True):
+...   n = data['node']
+...   print n.name, n.result.result()
+| None
+A 48
+B 1600
 
 
-Once the graph has been built, it must be explicitly evaluated
 
-.. code-block :: python
-
-  evaluate(node.graph)
 
 Concepts
 ========
@@ -212,6 +220,9 @@ def nodeid():
 
     Generate a new node id
 
+    >>> nodeid()
+    UUID('...')
+
     :returns: node id
     :rtype: :class:`uuid.UUID`
 
@@ -229,9 +240,35 @@ class delayed(object):
     other :class:`Node` instances using the bitwise :meth:`~object.__and__`
     (``&``) and :meth:`~object.__or__` (``|``) operators to create a workflow.
 
+
+    Example:
+
+    >>> @delayed()
+    ... def foo(*args):
+    ...   for a in args:
+    ...     print a
+    >>> type(foo)
+    <type 'function'>
+    >>> node = foo(1, 2) & foo(3, 4)
+    >>> print node
+    <workflow.workflow.AndNode object at ...>
+    >>> evaluate(node.graph)
+    1
+    2
+    3
+    4
     """
 
     def __init__(self, graph=None, **kws):
+        """``kws`` will be passed to the :class:`Node` constructor.
+
+        :param graph: If ``graph`` not ``None``, this explicitly
+                      specifies the graph into which the :class:`Node`
+                      will be inserted.
+
+        :type graph: :class:`Graph` or ``None``
+
+        """
         self.G = graph
         self.kws = kws
 
@@ -255,6 +292,18 @@ def find_root_node(graph):
     Find the root node of a connected DAG
 
     :rtype: :class:`Node`
+
+    Example:
+
+
+    >>> @delayed()
+    ... def foo(a):
+    ...   return a
+    >>> node = foo(42) | foo(24)
+    >>> print node.name
+    |
+    >>> print find_root_node(node.graph).name
+    |
     """
 
     i = nx.topological_sort(graph)[0]
@@ -269,6 +318,21 @@ def evaluate(graph):
 
     Starting from the root node, evaluate the branches.
     The graph nodes are updated in-place.
+
+    Example:
+
+    >>> @delayed()
+    ... def foo(a):
+    ...   return a
+    >>> node = foo(42) & foo(24)
+    >>> print evaluate(node.graph)
+    None
+    >>> for _, data in node.graph.nodes(data=True):
+    ...   n = data['node']
+    ...   print n.name, n.result.result()
+    & None
+    foo 42
+    foo 24
     """
 
     assert nx.is_weakly_connected(graph)
@@ -567,6 +631,13 @@ class AndNode(OpNode):
     Children of :class:`AndNode` will be evaluated in the order in
     which they were added as children of this node.
 
+    Example:
+
+    >>> @delayed()
+    ... def foo(a): return 42
+    >>> foo(42) & foo(24)
+    <workflow.workflow.AndNode object at ...>
+
     """
 
     # Implementation notes:
@@ -601,6 +672,12 @@ class OrNode(OpNode):
     Children of :class:`OrNode` will be evaluated in parallel, sparked
     in the order in which they were added as children of this node.
 
+    Example:
+
+    >>> @delayed()
+    ... def foo(a): return 42
+    >>> foo(42) | foo(24)
+    <workflow.workflow.OrNode object at ...>
     """
 
     # Implementation notes:
