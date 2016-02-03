@@ -406,14 +406,15 @@ class Node(HasTraits):
 
     """
     
-    def __init__(self, (f, args, kws), graph=None, executor=None,
+    def __init__(self, f_args_kws, graph=None, executor=None,
                  timeout=None):
         """Create a :class:`Node` to evaluate a function ``f`` in some
         ``graph`` using a given ``executor``
 
-        :param func: f_args_kws = (f, args, kws) the function to
-                                  evaluate (any callable) along with
-                                  positional and keywork arguments.
+        :param func: f_args_kws = (f, args, kws) a 3-tuple of the
+                                  function to evaluate (any callable)
+                                  along with positional and keywork
+                                  arguments.
 
         :param graph: The :class:`Graph` in which to insert the node
                       upon composition with others. A value of
@@ -427,6 +428,7 @@ class Node(HasTraits):
 
         """
         self.id = nodeid()
+        f, args, kws = f_args_kws
         self.f = f
         self._args = args
         self._kws = kws
