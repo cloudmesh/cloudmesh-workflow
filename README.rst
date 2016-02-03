@@ -1,4 +1,4 @@
-|unstable| |master|
+|master-status| |master-docs|
 
 
 ==========
@@ -25,9 +25,18 @@ functions.
 
 See ReadTheDocs:
 
-- |unstable|
-- |master|
+- |unstable-docs|: unstable
+- |master-docs|: master
 
+
+==============
+ Build Status
+==============
+
+On Travis:
+
+- |unstable-status|: unstable
+- |master-status|: master
 
 ==============
  Contributing
@@ -45,10 +54,16 @@ See ReadTheDocs:
 See `LICENSE <https://github.com/cloudmesh/workflow/blob/master/LICENSE>`_
 
 
-.. |unstable| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=unstable
+.. |unstable-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=unstable
    :target: http://cloudmesh-workflow.readthedocs.org/en/unstable
    :alt: Documentation for unstable branch
 
-.. |master| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=master
+.. |master-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=master
    :target: http://cloudmesh-workflow.readthedocs.org/en/master/
    :alt: Documentation for master branch
+
+.. |master-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=master
+    :target: https://travis-ci.org/cloudmesh/workflow
+
+.. |unstable-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=unstable
+    :target: https://travis-ci.org/cloudmesh/workflow
