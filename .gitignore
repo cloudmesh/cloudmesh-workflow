@@ -2,3 +2,5 @@
 workflow/version.py
 build
 code
+.tox
+workflow.egg-info
