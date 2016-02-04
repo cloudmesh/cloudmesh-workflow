@@ -137,6 +137,38 @@ A 48
 B 1600
 
 
+Cloudmesh Example
+=================
+
+.. warning::
+
+  This is a proposed usage example and hasn't been tested yet.
+
+
+.. code-block:: python
+
+  from cloudmesh_base import Shell
+  from workflow import delayed, evaluate
+
+  @delayed()
+  def FutureSystems():
+    "Start a VM on FutureSystems OpenStack Kilo"
+    Shell.cm('boot', 'kilo')
+
+  @delayed()
+  def Cybera(x, y):
+    "Start a VM on Cybera cloud"
+    Shell.cm('boot', 'cybera')
+
+  @delayed()
+  def Rackspace():
+    "Start a VM on Rackspace"
+    Shell.cm('boot', 'rackspace')
+
+  def main():
+    "Boot machines in parallel"
+    node = FutureSystems() | Cybera() | Rackspace()
+    evaluate(node.graph)
 
 
 Concepts

@@ -7,8 +7,8 @@
 
 
 Workflow provides a tiny Domain Specific Language (two operators:
-``|`` and ``&``) for sequential and parallel evaluation of Python
-functions.
+``|`` and ``&``) for parallel and sequential (respectively) evaluation
+of Python functions.
 
 ==============
  Installation
