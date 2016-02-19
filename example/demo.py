@@ -73,6 +73,6 @@ def test():
     nx.drawing.nx_pydot.write_dot(H, '{file}.dot'.format(**data))
     dot2svg("{file}.dot".format(**data))
     #os.system("open {file}.svg".format(**data))
-    browser("{file}.svg".format(**data))
+    #browser("{file}.svg".format(**data))
 test()
 

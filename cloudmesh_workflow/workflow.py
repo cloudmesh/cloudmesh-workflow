@@ -30,6 +30,14 @@ from concurrent import futures
 from multiprocessing import cpu_count
 from collections import OrderedDict
 
+import logging
+logging.basicConfig(
+    format='%(asctime)s.%(msecs)03d: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    #format='%(asctime)s: %(message)s',
+    #datefmt='%m/%d/%Y %I:%M:%S %p',
+    filename='workflow.log',
+    level=logging.INFO)
 
 __doc__ = """\
 Usage Summary
@@ -531,6 +539,8 @@ class Node(HasTraits):
         """
 
         if self.result is None:
+            logging.info(str(self.f.__name__) + " start", *self._args,
+                         **self._kws)
             self.result = self.executor.submit(self.f, *self._args, **self._kws)
         else:
             # already started
@@ -545,6 +555,8 @@ class Node(HasTraits):
 
         """
         self.result.result(self.timeout)
+        logging.info(self.f.__name__ + " finish")
+
 
     def eval(self):
         """eval() -> None
