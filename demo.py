@@ -1,6 +1,8 @@
 from cloudmesh_workflow.workflow import Graph
 from cloudmesh_workflow.workflow import delayed
+from cloudmesh_workflow.workflow import evaluate
 import networkx as nx
+import time
 
 def test():
 
