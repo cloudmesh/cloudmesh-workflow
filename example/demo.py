@@ -1,8 +1,11 @@
 from cloudmesh_workflow.workflow import Graph
 from cloudmesh_workflow.workflow import delayed
 from cloudmesh_workflow.workflow import evaluate
+from cloudmesh_workflow.util import dot2svg
 import networkx as nx
 import time
+import os
+
 
 def test():
 
@@ -63,6 +66,9 @@ def test():
     H, N, E = clean(G)
     evaluate(G)
     #nx.write_dot(H, '/tmp/test.dot')
-    nx.drawing.nx_pydot.write_dot(H, '/tmp/test.dot')
+    
+    nx.drawing.nx_pydot.write_dot(H, '{file}.dot'.format(**data))
+
+    
 test()
 
