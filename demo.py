@@ -62,6 +62,7 @@ def test():
     G = node.graph
     H, N, E = clean(G)
     evaluate(G)
-    nx.write_dot(H, '/tmp/test.dot')
-
+    #nx.write_dot(H, '/tmp/test.dot')
+    nx.drawing.nx_pydot.write_dot(H, '/tmp/test.dot')
 test()
+
