@@ -1,3 +1,5 @@
+.idea*
+dist*
 *.pyc
 cloudmesh_workflow/version.py
 build
