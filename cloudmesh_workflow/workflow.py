@@ -41,7 +41,7 @@ logging.basicConfig(
 
 __doc__ = """\
 Usage Summary
-=======
+=============
 
 1. Define delayed functions:
 
