@@ -17,10 +17,6 @@
 # Author: Badi' Abdul-Wahid <badi@iu.edu>
 # Organization: Indiana University / FutureSystems
 #
-
-
-
-
 from __future__ import absolute_import
 
 import traits.api as T
@@ -37,7 +33,7 @@ from collections import OrderedDict
 
 __doc__ = """\
 Usage Summary
-=======
+=============
 
 1. Define delayed functions:
 
@@ -137,8 +133,8 @@ A 48
 B 1600
 
 
-Cloudmesh Example
-=================
+Cloudmesh Workflow Example
+==========================
 
 .. warning::
 
@@ -224,9 +220,6 @@ API
 ===
 
 """
-
-
-
 
 __all__ = [
     'delayed', 'evaluate',
@@ -437,7 +430,7 @@ class Node(HasTraits):
     .. _concurrent.futures.Future: https://pythonhosted.org/futures/index.html#future-objects
 
     """
-    
+
     def __init__(self, f_args_kws, graph=None, executor=None,
                  timeout=None):
         """Create a :class:`Node` to evaluate a function ``f`` in some
@@ -469,7 +462,6 @@ class Node(HasTraits):
         self.executor = executor or futures.ThreadPoolExecutor(cpu_count())
         self.timeout = timeout
 
-
     def _init_graph(self, graph=None):
         """Initialize the `graph` attribute
 
@@ -482,7 +474,6 @@ class Node(HasTraits):
 
         elif self.graph is None and graph is not None:
             self.graph = graph
-
 
     def _merge_graph(self, other):
         """Combine this :class:`Node`'s graph with ``other``'s :class:`Graph`.
@@ -501,7 +492,6 @@ class Node(HasTraits):
                 self.graph.add_node(t, tn)
                 self.graph.add_edge(s, t, data)
             other.graph = self.graph
-
 
     @property
     def children_iter(self):
@@ -530,7 +520,6 @@ class Node(HasTraits):
         """
         return list(self.children_iter)
 
-
     def start(self):
         """start() -> None
 
@@ -540,14 +529,12 @@ class Node(HasTraits):
         already started.
 
         """
-        
 
         if self.result is None:
             self.result = self.executor.submit(self.f, *self._args, **self._kws)
         else:
             # already started
             pass
-
 
     def wait(self):
         """wait() -> None
@@ -559,7 +546,6 @@ class Node(HasTraits):
         """
         self.result.result(self.timeout)
 
-
     def eval(self):
         """eval() -> None
 
@@ -568,7 +554,6 @@ class Node(HasTraits):
         """
         self.start()
         self.wait()
-
 
     def compose(self, other, MkOpNode):
         """compose(other, callable(graph=Graph)) -> OpNode
@@ -613,7 +598,6 @@ class Node(HasTraits):
 
         return op
 
-
     def __and__(self, other):
         """Sequential composition
 
@@ -627,7 +611,6 @@ class Node(HasTraits):
 
         return self.compose(other, AndNode)
 
-
     def __or__(self, other):
         """Parallel composition
 
@@ -640,7 +623,6 @@ class Node(HasTraits):
         """
 
         return self.compose(other, OrNode)
-
 
 
 class OpNode(Node):
@@ -683,7 +665,6 @@ class AndNode(OpNode):
     # semantics. Any other children will be evaluted in the `wait`
     # function sequentially.
 
-
     name = T.String('&')
 
     def start(self):
@@ -691,7 +672,6 @@ class AndNode(OpNode):
         for child in self.children_iter:
             child.start()
             break
-
 
     def wait(self):
         for child in self.children_iter:
@@ -731,9 +711,9 @@ class OrNode(OpNode):
         self.result.set_result(None)
 
 
-######################################################################
-## testing
-######################################################################
+# #####################################################################
+# # testing
+# #####################################################################
 
 def test():
 
@@ -769,7 +749,6 @@ def test():
         time.sleep(3)
         # print 'F STOP'
 
-
     def clean(G):
         H = G.copy()
         N = {}
@@ -780,9 +759,7 @@ def test():
             del H.node[n]['node']
             N[n] = node.name
 
-
         return H, N, E
-
 
     # node = ( A() | B() | C() )
     # node = ( A() & B() | C() )

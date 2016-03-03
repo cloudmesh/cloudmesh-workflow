@@ -1,6 +1,10 @@
+.idea
+*.egg-info
+dist
+*.log
 *.pyc
 cloudmesh_workflow/version.py
 build
 code
 .tox
-workflow.egg-info
+

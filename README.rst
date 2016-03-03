@@ -2,11 +2,17 @@
 
 
 ==========
- workflow
+Status
 ==========
 
+Please use for now the dev branch if you work with Cloudmesh.
 
-Workflow provides a tiny Domain Specific Language (two operators:
+==================
+Cloudmesh workflow
+==================
+
+
+Cloudmesh workflow provides a tiny Domain Specific Language (two operators:
 ``|`` and ``&``) for parallel and sequential (respectively) evaluation
 of Python functions.
 
