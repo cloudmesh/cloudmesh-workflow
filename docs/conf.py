@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Workflow documentation build configuration file, created by
+# Cloudmesh Workflow documentation build configuration file, created by
 # sphinx-quickstart on Mon Feb  1 15:28:48 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Workflow'
+project = u'Cloudmesh Workflow'
 copyright = u'2016, Badi\' Abdul-Wahid'
 author = u'Badi\' Abdul-Wahid'
 
@@ -82,7 +82,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -208,7 +208,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Workflowdoc'
+htmlhelp_basename = 'cloudmeshworkflowdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -230,7 +230,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Workflow.tex', u'Workflow Documentation',
+    (master_doc, 'cloudmesh_workflow.tex', u'Cloudmesh Workflow Documentation',
      u'Badi\' Abdul-Wahid', 'manual'),
 ]
 
@@ -260,7 +260,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'workflow', u'Workflow Documentation',
+    (master_doc, 'workflow', u'Cloudmesh Workflow Documentation',
      [author], 1)
 ]
 
@@ -274,8 +274,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Workflow', u'Workflow Documentation',
-     author, 'Workflow', 'One line description of project.',
+    (master_doc, 'Cloudmesh Workflow', u'Cloudmesh Workflow Documentation',
+     author, 'Cloudmesh Workflow', 'One line description of project.',
      'Miscellaneous'),
 ]
 
