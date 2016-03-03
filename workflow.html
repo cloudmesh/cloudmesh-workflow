@@ -1,0 +1,708 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>workflow package &mdash; Cloudmesh Workflow 0.1.1-1456979571-dfde36c5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Cloudmesh Workflow 0.1.1-1456979571-dfde36c5 documentation" href="index.html"/>
+        <link rel="prev" title="Cloudmesh Workflow" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Cloudmesh Workflow
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.1-1456979571-dfde36c5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">workflow package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage-summary">Usage Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#description">Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloudmesh-example">Cloudmesh Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concepts">Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#deferring-function-evaluation">Deferring function evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#composing-nodes-for-parallel-sequential-semantics">Composing <code class="docutils literal"><span class="pre">Node</span></code>s for parallel/sequential semantics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-of-a-delayed-function">Evaluation of a delayed function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Cloudmesh Workflow</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>workflow package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/workflow.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-cloudmesh_workflow.workflow">
+<span id="workflow-package"></span><h1>workflow package<a class="headerlink" href="#module-cloudmesh_workflow.workflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage-summary">
+<h2>Usage Summary<a class="headerlink" href="#usage-summary" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Define delayed functions:</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="n">foo</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="k">print</span> <span class="n">foo</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">B</span><span class="p">():</span>
+<span class="gp">... </span>  <span class="k">print</span> <span class="s1">&#39;Boo!&#39;</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">x</span> <span class="o">**</span> <span class="n">y</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Compose the functions using <code class="docutils literal"><span class="pre">|</span></code> and <code class="docutils literal"><span class="pre">&amp;</span></code> for parallel and
+sequential evaluation:</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">root_node</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="s1">&#39;hello world!&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">B</span><span class="p">())</span> <span class="o">&amp;</span> <span class="n">C</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">root_node</span>
+<span class="go">&lt;cloudmesh_workflow.workflow.AndNode object at ...&gt;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Evaluate the resulting graph</li>
+</ol>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="n">root_node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+<span class="go">Boo!</span>
+<span class="go">hello world!</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This module provides an api for building a workflow graph of labeled
+functions which can then be evaluated. Nodes connected with a desired
+ordering or run sequentially, others can be run in parallel.</p>
+<p>Syntax is inspired by the parallel (||) and sequential (;) operators.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>(A || B) ; (C || D)
+</pre></div>
+</div>
+<p>means that A and B can be evaluated in parallel, and likewise C and D,
+but both A and B must be completed before C or D may begin.</p>
+<p>The python implementation overrides the bitwise <strong>OR</strong> (|) and <strong>AND</strong>
+(&amp;) operators to provide a similar syntactic feel. The example above
+should be defined as such:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">A</span><span class="p">()</span> <span class="o">|</span> <span class="n">B</span><span class="p">())</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">C</span><span class="p">()</span> <span class="o">|</span> <span class="n">D</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The python operator precedence for <code class="docutils literal"><span class="pre">|</span></code> and <code class="docutils literal"><span class="pre">&amp;</span></code> is unchanged:
+<code class="docutils literal"><span class="pre">&amp;</span></code> has higher precedence than <code class="docutils literal"><span class="pre">|</span></code>.</p>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The first part is to mark top-level functions as <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-func docutils literal"><span class="pre">delayed()</span></code></a>.  The
+<code class="docutils literal"><span class="pre">&#64;delayed()</span></code> decoration wraps the function so that calling the
+function inserts the <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>, without applying the parameters,
+into the call <a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>. You can access the <code class="docutils literal"><span class="pre">graph</span></code> property of
+any node to get the current call graph.</p>
+<p>For example, define two delayed functions <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">B</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">A</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">x</span><span class="o">*</span><span class="mi">2</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">B</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">x</span> <span class="o">**</span> <span class="n">y</span>
+</pre></div>
+</div>
+<p>Compose <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">B</span></code> to run in parallel</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">node</span> <span class="o">=</span> <span class="n">A</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span> <span class="o">|</span> <span class="n">B</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Evaluate the graph:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Print the results:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span>
+<span class="gp">... </span>  <span class="k">print</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="go">| None</span>
+<span class="go">A 48</span>
+<span class="go">B 1600</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="cloudmesh-example">
+<h2>Cloudmesh Example<a class="headerlink" href="#cloudmesh-example" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a proposed usage example and hasn&#8217;t been tested yet.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">cloudmesh_base</span> <span class="kn">import</span> <span class="n">Shell</span>
+<span class="kn">from</span> <span class="nn">workflow</span> <span class="kn">import</span> <span class="n">delayed</span><span class="p">,</span> <span class="n">evaluate</span>
+
+<span class="nd">@delayed</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">FutureSystems</span><span class="p">():</span>
+  <span class="s2">&quot;Start a VM on FutureSystems OpenStack Kilo&quot;</span>
+  <span class="n">Shell</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="s1">&#39;boot&#39;</span><span class="p">,</span> <span class="s1">&#39;kilo&#39;</span><span class="p">)</span>
+
+<span class="nd">@delayed</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">Cybera</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+  <span class="s2">&quot;Start a VM on Cybera cloud&quot;</span>
+  <span class="n">Shell</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="s1">&#39;boot&#39;</span><span class="p">,</span> <span class="s1">&#39;cybera&#39;</span><span class="p">)</span>
+
+<span class="nd">@delayed</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">Rackspace</span><span class="p">():</span>
+  <span class="s2">&quot;Start a VM on Rackspace&quot;</span>
+  <span class="n">Shell</span><span class="o">.</span><span class="n">cm</span><span class="p">(</span><span class="s1">&#39;boot&#39;</span><span class="p">,</span> <span class="s1">&#39;rackspace&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+  <span class="s2">&quot;Boot machines in parallel&quot;</span>
+  <span class="n">node</span> <span class="o">=</span> <span class="n">FutureSystems</span><span class="p">()</span> <span class="o">|</span> <span class="n">Cybera</span><span class="p">()</span> <span class="o">|</span> <span class="n">Rackspace</span><span class="p">()</span>
+  <span class="n">evaluate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="concepts">
+<h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="deferring-function-evaluation">
+<h3>Deferring function evaluation<a class="headerlink" href="#deferring-function-evaluation" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a> is intended to be used as a decorator to lift
+arbitrary functions to have delayed semantics. Evaluation semantics of
+<a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a> objects is:</p>
+<ol class="arabic simple">
+<li>calling a delayed function stores the arguments and returns a <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>.</li>
+<li><a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s are composed using bitwise <code class="docutils literal"><span class="pre">&amp;</span></code> and <code class="docutils literal"><span class="pre">|</span></code>
+operators to denote sequential and parallel evaluation order,
+respectively.</li>
+</ol>
+</div>
+<div class="section" id="composing-nodes-for-parallel-sequential-semantics">
+<h3>Composing <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s for parallel/sequential semantics<a class="headerlink" href="#composing-nodes-for-parallel-sequential-semantics" title="Permalink to this headline">¶</a></h3>
+<p>A <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> captures the evaluation state of a <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a>
+function. It provides several important attributes:</p>
+<ol class="arabic simple">
+<li><code class="xref py py-attr docutils literal"><span class="pre">graph</span></code>: the evaluation graph in which the function
+is located.</li>
+<li><code class="xref py py-attr docutils literal"><span class="pre">f</span></code>: the function to evaluate.</li>
+<li><code class="xref py py-attr docutils literal"><span class="pre">name</span></code>: the name of the node. Typically captured from
+<code class="xref py py-attr docutils literal"><span class="pre">f</span></code>, but may be a shorthand representation of
+<a class="reference internal" href="#cloudmesh_workflow.workflow.OpNode" title="cloudmesh_workflow.workflow.OpNode"><code class="xref py py-class docutils literal"><span class="pre">OpNode</span></code></a>.</li>
+<li><code class="xref py py-attr docutils literal"><span class="pre">result</span></code>: the status and result of the evaluation.</li>
+</ol>
+<p><a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s are created by calling <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a> functions and
+then composed using <code class="docutils literal"><span class="pre">&amp;</span></code> and <code class="docutils literal"><span class="pre">|</span></code>. Each composition returns a new
+<a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> in the graph.</p>
+</div>
+<div class="section" id="evaluation-of-a-delayed-function">
+<h3>Evaluation of a delayed function<a class="headerlink" href="#evaluation-of-a-delayed-function" title="Permalink to this headline">¶</a></h3>
+<p>Once <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s have been composed to achieve the desired
+parallelism, evaluate the graph by calling <a class="reference internal" href="#cloudmesh_workflow.workflow.evaluate" title="cloudmesh_workflow.workflow.evaluate"><code class="xref py py-func docutils literal"><span class="pre">evaluate()</span></code></a> on the
+<code class="xref py py-attr docutils literal"><span class="pre">graph</span></code> attribute of the composed node.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.delayed">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">delayed</code><span class="sig-paren">(</span><em>graph=None</em>, <em>**kws</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.delayed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a> is a decorator that delays evaluation of a function
+until explicitly called for using <a class="reference internal" href="#cloudmesh_workflow.workflow.evaluate" title="cloudmesh_workflow.workflow.evaluate"><code class="xref py py-func docutils literal"><span class="pre">evaluate()</span></code></a>.</p>
+<p>Intended usage: decorate a function such that <a class="reference external" href="https://docs.python.org/reference/datamodel.html#object.__call__" title="(in Python v2.7)"><code class="xref py py-meth docutils literal"><span class="pre">__call__()</span></code></a>    ing it returns a <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> instance that can be combined with
+other <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> instances using the bitwise <a class="reference external" href="https://docs.python.org/reference/datamodel.html#object.__and__" title="(in Python v2.7)"><code class="xref py py-meth docutils literal"><span class="pre">__and__()</span></code></a>
+(<code class="docutils literal"><span class="pre">&amp;</span></code>) and <a class="reference external" href="https://docs.python.org/reference/datamodel.html#object.__or__" title="(in Python v2.7)"><code class="xref py py-meth docutils literal"><span class="pre">__or__()</span></code></a> (<code class="docutils literal"><span class="pre">|</span></code>) operators to create a workflow.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+<span class="go">&lt;type &#39;function&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node</span> <span class="o">=</span> <span class="n">foo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">foo</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">node</span>
+<span class="go">&lt;cloudmesh_workflow.workflow.AndNode object at ...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evaluate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="go">2</span>
+<span class="go">3</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">kws</span></code> will be passed to the <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> constructor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> (<a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> or <code class="docutils literal"><span class="pre">None</span></code>) &#8211; If <code class="docutils literal"><span class="pre">graph</span></code> not <code class="docutils literal"><span class="pre">None</span></code>, this explicitly
+specifies the graph into which the <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>
+will be inserted.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cloudmesh_workflow.workflow.evaluate">
+<code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">evaluate</code><span class="sig-paren">(</span><em>Graph</em><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#cloudmesh_workflow.workflow.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> -&gt; IO ()</p>
+<p>Starting from the root node, evaluate the branches.
+The graph nodes are updated in-place.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node</span> <span class="o">=</span> <span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">foo</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span>
+<span class="go">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span>
+<span class="gp">... </span>  <span class="k">print</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">n</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+<span class="go">&amp; None</span>
+<span class="go">foo 42</span>
+<span class="go">foo 24</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.Node">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>f_args_kws</em>, <em>graph=None</em>, <em>executor=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">traits.has_traits.HasTraits</span></code></p>
+<p>A node in the <a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> and associated state.</p>
+<p><a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s can be composed using bitwise <a class="reference external" href="https://docs.python.org/reference/datamodel.html#object.__and__" title="(in Python v2.7)"><code class="xref py py-meth docutils literal"><span class="pre">__and__()</span></code></a> and
+<a class="reference external" href="https://docs.python.org/reference/datamodel.html#object.__or__" title="(in Python v2.7)"><code class="xref py py-meth docutils literal"><span class="pre">__or__()</span></code></a> operators to denote sequential or parallel
+evaluation order, respectively.</p>
+<p>For example, give <code class="docutils literal"><span class="pre">A</span></code>, <code class="docutils literal"><span class="pre">B</span></code>, and <code class="docutils literal"><span class="pre">C</span></code> functions that have been
+lifted to a <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> type (eg through the <a class="reference internal" href="#cloudmesh_workflow.workflow.delayed" title="cloudmesh_workflow.workflow.delayed"><code class="xref py py-class docutils literal"><span class="pre">delayed</span></code></a>
+decorator <code class="docutils literal"><span class="pre">&#64;delayed()</span></code>), to evaluate <code class="docutils literal"><span class="pre">A</span></code> and <code class="docutils literal"><span class="pre">B</span></code> in parallel,
+then <code class="docutils literal"><span class="pre">C</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">G</span> <span class="o">=</span> <span class="p">(</span>  <span class="p">(</span><span class="n">A</span><span class="p">(</span><span class="n">argA0</span><span class="p">,</span> <span class="n">argA1</span><span class="p">)</span> <span class="o">|</span> <span class="n">B</span><span class="p">())</span> <span class="o">&amp;</span> <span class="n">C</span><span class="p">(</span><span class="n">argC</span><span class="p">)</span>  <span class="p">)</span><span class="o">.</span><span class="n">graph</span>
+</pre></div>
+</div>
+<p>will create the call <a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> <code class="docutils literal"><span class="pre">G</span></code>.
+In order to evaluate <code class="docutils literal"><span class="pre">G</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">evaluate</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> to evaluate a function <code class="docutils literal"><span class="pre">f</span></code> in some
+<code class="docutils literal"><span class="pre">graph</span></code> using a given <code class="docutils literal"><span class="pre">executor</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> &#8211; f_args_kws = (f, args, kws) a 3-tuple of the
+function to evaluate (any callable)
+along with positional and keywork
+arguments.</li>
+<li><strong>graph</strong> &#8211; The <a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> in which to insert the node
+upon composition with others. A value of
+<code class="docutils literal"><span class="pre">None</span></code> will create a new graph. When composed
+with another node in a different
+<code class="xref py py-func docutils literal"><span class="pre">Node.graph()</span></code> the two graphs with be
+merged.</li>
+<li><strong>executor</strong> &#8211; a <code class="xref py py-class docutils literal"><span class="pre">futures.Executor</span></code> instance</li>
+<li><strong>timeout</strong> &#8211; seconds (float or int) to wait.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="cloudmesh_workflow.workflow.Node.children">
+<code class="descname">children</code><a class="headerlink" href="#cloudmesh_workflow.workflow.Node.children" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>]</p>
+<p>The children of this node.
+See <a class="reference internal" href="#cloudmesh_workflow.workflow.Node.children_iter" title="cloudmesh_workflow.workflow.Node.children_iter"><code class="xref py py-func docutils literal"><span class="pre">Node.children_iter()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cloudmesh_workflow.workflow.Node.children_iter">
+<code class="descname">children_iter</code><a class="headerlink" href="#cloudmesh_workflow.workflow.Node.children_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator of <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s</p>
+<p>This <code class="docutils literal"><span class="pre">yield</span></code>&#8216;s all the children <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s of this node.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Child nodes of this node.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.Node.compose">
+<code class="descname">compose</code><span class="sig-paren">(</span><em>other</em>, <em>callable(graph=Graph)</em><span class="sig-paren">)</span> &rarr; OpNode<a class="headerlink" href="#cloudmesh_workflow.workflow.Node.compose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose this <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> with another <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>.</p>
+<p>Two Nodes are composed using a proxy <a class="reference internal" href="#cloudmesh_workflow.workflow.OpNode" title="cloudmesh_workflow.workflow.OpNode"><code class="xref py py-class docutils literal"><span class="pre">OpNode</span></code></a>.  The
+OpNode defines the evaluation semantics of its child nodes (eg
+sequantial or parallel).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> &#8211; a <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></li>
+<li><strong>MkOpNode</strong> &#8211; a callable with keyword arg graph constructor
+for the proxy node</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A new <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> with <code class="docutils literal"><span class="pre">self</span></code> and <code class="docutils literal"><span class="pre">other</span></code> and
+children.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.Node.eval">
+<code class="descname">eval</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#cloudmesh_workflow.workflow.Node.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start and wait for a node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.Node.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#cloudmesh_workflow.workflow.Node.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start evaluating this node</p>
+<p>Start evaluating this nodes function <code class="docutils literal"><span class="pre">self.f</span></code> if it hasn&#8217;t
+already started.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.Node.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; None<a class="headerlink" href="#cloudmesh_workflow.workflow.Node.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for this node to finish evaluating</p>
+<p>This may timeout if <code class="xref py py-attr docutils literal"><span class="pre">timeout</span></code> is specified.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.OpNode">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">OpNode</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.OpNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">cloudmesh_workflow.workflow.Node</span></code></a></p>
+<p>A proxy node defining the evaluation semantics of its children
+<a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>s</p>
+<p>Intended usage: this class it not intended to be instantiated
+directly. Rather, classes should inherit from <a class="reference internal" href="#cloudmesh_workflow.workflow.OpNode" title="cloudmesh_workflow.workflow.OpNode"><code class="xref py py-class docutils literal"><span class="pre">OpNode</span></code></a> to
+defined the desired semantics.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.AndNode">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">AndNode</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.AndNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cloudmesh_workflow.workflow.OpNode" title="cloudmesh_workflow.workflow.OpNode"><code class="xref py py-class docutils literal"><span class="pre">cloudmesh_workflow.workflow.OpNode</span></code></a></p>
+<p>Sequential evaluation semantics.</p>
+<p>Children of <a class="reference internal" href="#cloudmesh_workflow.workflow.AndNode" title="cloudmesh_workflow.workflow.AndNode"><code class="xref py py-class docutils literal"><span class="pre">AndNode</span></code></a> will be evaluated in the order in
+which they were added as children of this node.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> <span class="k">return</span> <span class="mi">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">foo</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
+<span class="go">&lt;cloudmesh_workflow.workflow.AndNode object at ...&gt;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.AndNode.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.AndNode.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.AndNode.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.AndNode.wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.OrNode">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">OrNode</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.OrNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cloudmesh_workflow.workflow.OpNode" title="cloudmesh_workflow.workflow.OpNode"><code class="xref py py-class docutils literal"><span class="pre">cloudmesh_workflow.workflow.OpNode</span></code></a></p>
+<p>Parallel evaluation semantics</p>
+<p>Children of <a class="reference internal" href="#cloudmesh_workflow.workflow.OrNode" title="cloudmesh_workflow.workflow.OrNode"><code class="xref py py-class docutils literal"><span class="pre">OrNode</span></code></a> will be evaluated in parallel, sparked
+in the order in which they were added as children of this node.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">):</span> <span class="k">return</span> <span class="mi">42</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span> <span class="o">|</span> <span class="n">foo</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
+<span class="go">&lt;cloudmesh_workflow.workflow.OrNode object at ...&gt;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.OrNode.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.OrNode.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="cloudmesh_workflow.workflow.OrNode.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.OrNode.wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="cloudmesh_workflow.workflow.Graph">
+<em class="property">class </em><code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">Graph</code><span class="sig-paren">(</span><em>data=None</em>, <em>**attr</em><span class="sig-paren">)</span><a class="headerlink" href="#cloudmesh_workflow.workflow.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">networkx.classes.digraph.DiGraph</span></code></p>
+<p>A NetworkX <a class="reference external" href="https://networkx.github.io/documentation/latest/reference/classes.digraph.html#networkx.DiGraph" title="(in NetworkX v1.10)"><code class="xref py py-func docutils literal"><span class="pre">networkx.DiGraph()</span></code></a> where the ordering of edges/nodes is
+preserved</p>
+<p>Initialize a graph with edges, name, graph attributes.</p>
+<dl class="docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">input graph</span></dt>
+<dd>Data to initialize graph.  If data=None (default) an empty
+graph is created.  The data can be an edge list, or any
+NetworkX graph object.  If the corresponding optional Python
+packages are installed the data can also be a NumPy matrix
+or 2d ndarray, a SciPy sparse matrix, or a PyGraphviz graph.</dd>
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">string, optional (default=&#8217;&#8216;)</span></dt>
+<dd>An optional name for the graph.</dd>
+<dt>attr <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments, optional (default= no attributes)</span></dt>
+<dd>Attributes to add to graph as key=value pairs.</dd>
+</dl>
+<p>convert</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>   <span class="c1"># or DiGraph, MultiGraph, MultiDiGraph, etc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;my graph&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">),(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)]</span> <span class="c1"># list of edges</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arbitrary graph attribute pairs (key=value) may be assigned</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">=</span><span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="s2">&quot;Friday&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">graph</span>
+<span class="go">{&#39;day&#39;: &#39;Friday&#39;}</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="cloudmesh_workflow.workflow.Graph.adjlist_dict_factory">
+<code class="descname">adjlist_dict_factory</code><a class="headerlink" href="#cloudmesh_workflow.workflow.Graph.adjlist_dict_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">OrderedDict</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="cloudmesh_workflow.workflow.Graph.node_dict_factory">
+<code class="descname">node_dict_factory</code><a class="headerlink" href="#cloudmesh_workflow.workflow.Graph.node_dict_factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">OrderedDict</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="cloudmesh_workflow.workflow.find_root_node">
+<code class="descclassname">cloudmesh_workflow.workflow.</code><code class="descname">find_root_node</code><span class="sig-paren">(</span><em>Graph</em><span class="sig-paren">)</span> &rarr; Node<a class="headerlink" href="#cloudmesh_workflow.workflow.find_root_node" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#cloudmesh_workflow.workflow.Graph" title="cloudmesh_workflow.workflow.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> -&gt; <a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></p>
+<p>Find the root node of a connected DAG</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#cloudmesh_workflow.workflow.Node" title="cloudmesh_workflow.workflow.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@delayed</span><span class="p">()</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="gp">... </span>  <span class="k">return</span> <span class="n">a</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">node</span> <span class="o">=</span> <span class="n">foo</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span> <span class="o">|</span> <span class="n">foo</span><span class="p">(</span><span class="mi">24</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+<span class="go">|</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">find_root_node</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">graph</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+<span class="go">|</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Cloudmesh Workflow" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Badi&#39; Abdul-Wahid.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.1-1456979571-dfde36c5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
