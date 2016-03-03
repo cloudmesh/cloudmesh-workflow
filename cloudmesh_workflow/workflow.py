@@ -33,7 +33,7 @@ from collections import OrderedDict
 
 __doc__ = """\
 Usage Summary
-=======
+=============
 
 1. Define delayed functions:
 
