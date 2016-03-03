@@ -141,8 +141,8 @@ A 48
 B 1600
 
 
-Cloudmesh Example
-=================
+Cloudmesh Workflow Example
+==========================
 
 .. warning::
 
