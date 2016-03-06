@@ -6,4 +6,5 @@ cloudmesh_workflow/version.py
 build
 code
 .tox
-workflow.egg-info
+*.egg-info
+__pycache__

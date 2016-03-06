@@ -18,6 +18,7 @@
 # Organization: Indiana University / FutureSystems
 #
 from __future__ import absolute_import
+from __future__ import print_function
 
 import traits.api as T
 from traits.api import HasTraits
@@ -49,11 +50,11 @@ Usage Summary
 >>> @delayed()
 ... def A(foo):
 ...   time.sleep(0.05)
-...   print foo
+...   print (foo)
 >>>
 >>> @delayed()
 ... def B():
-...   print 'Boo!'
+...   print ('Boo!')
 >>>
 >>> @delayed()
 ... def C(x, y):
@@ -135,7 +136,7 @@ Print the results:
 
 >>> for _, data in node.graph.nodes(data=True):
 ...   n = data['node']
-...   print n.name, n.result.result()
+...   print (n.name, n.result.result())
 | None
 A 48
 B 1600
@@ -279,11 +280,11 @@ class delayed(object):
     >>> @delayed()
     ... def foo(*args):
     ...   for a in args:
-    ...     print a
+    ...     print (a)
     >>> type(foo)
     <type 'function'>
     >>> node = foo(1, 2) & foo(3, 4)
-    >>> print node
+    >>> print (node)
     <cloudmesh_workflow.workflow.AndNode object at ...>
     >>> evaluate(node.graph)
     1
@@ -333,9 +334,9 @@ def find_root_node(graph):
     ... def foo(a):
     ...   return a
     >>> node = foo(42) | foo(24)
-    >>> print node.name
+    >>> print (node.name)
     |
-    >>> print find_root_node(node.graph).name
+    >>> print (find_root_node(node.graph).name)
     |
     """
 
@@ -358,11 +359,11 @@ def evaluate(graph):
     ... def foo(a):
     ...   return a
     >>> node = foo(42) & foo(24)
-    >>> print evaluate(node.graph)
+    >>> print (evaluate(node.graph))
     None
     >>> for _, data in node.graph.nodes(data=True):
     ...   n = data['node']
-    ...   print n.name, n.result.result()
+    ...   print (n.name, n.result.result())
     & None
     foo 42
     foo 24
@@ -597,7 +598,7 @@ class Node(HasTraits):
         assert self.graph == other.graph
         G = self.graph
 
-        # print self.name, operator, other.name
+        # print (self.name, operator, other.name)
 
         s, t = self.id, other.id
         other.id = t
@@ -731,35 +732,35 @@ def test():
 
     @delayed()
     def A():
-        print 'A START'
+        print ('A START')
         # for i in xrange(10):
-        #     print 'A', i
+        #     print ('A', i)
         time.sleep(3)
-        # print 'A STOP'
+        # print ('A STOP')
 
     @delayed()
     def B():
-        print 'B START'
+        print ('B START')
         time.sleep(3)
-        # print 'B STOP'
+        # print ('B STOP')
 
     @delayed()
     def C():
-        print 'C START'
+        print ('C START')
         time.sleep(3)
-        # print 'C STOP'
+        # print ('C STOP')
 
     @delayed()
     def D():
-        print 'D START'
+        print ('D START')
         time.sleep(3)
-        # print 'D STOP'
+        # print ('D STOP')
 
     @delayed()
     def F():
-        print 'F START'
+        print ('F START')
         time.sleep(3)
-        # print 'F STOP'
+        # print ('F STOP')
 
     def clean(G):
         H = G.copy()
