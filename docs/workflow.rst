@@ -1,8 +1,6 @@
-==================
- workflow package
-==================
-
-
+==========================
+cloudmesh workflow package
+==========================
 
 .. automodule:: cloudmesh_workflow.workflow
    :members:
