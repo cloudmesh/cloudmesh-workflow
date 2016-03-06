@@ -25,7 +25,6 @@ view:
 ######################################################################
 
 clean:
-<<<<<<< HEAD
 	rm -rf *.zip
 	rm -rf *.egg-info
 	rm -rf *.eggs
@@ -34,10 +33,4 @@ clean:
 	rm -rf dist
 	find . -name '__pycache__' -delete
 	find . -name '*.pyc' -delete
-	-pip uninstall cloudmesh_workflow -y > /dev/null
-=======
-	rm -rf *.egg-info *.eggs
-	rm -rf docs/build
-	rm -rf build
-	rm -rf dist
->>>>>>> master
+	-pip uninstall cloudmesh_workflow -y 2>/dev/null 

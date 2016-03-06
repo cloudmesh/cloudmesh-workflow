@@ -759,11 +759,7 @@ def test():
     def F():
         print ('F START')
         time.sleep(3)
-<<<<<<< HEAD
         # print ('F STOP')
-=======
-        # print 'F STOP'
->>>>>>> master
 
     def clean(G):
         H = G.copy()
