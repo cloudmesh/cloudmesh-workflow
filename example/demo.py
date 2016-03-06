@@ -21,25 +21,41 @@ def test():
 
     @delayed()
     def B():
+<<<<<<< HEAD:example/demo.py
         print ('B START')
+=======
+        print 'B START'
+>>>>>>> master:example/demo.py
         time.sleep(sleep_time)
         # print 'B STOP'
 
     @delayed()
     def C():
+<<<<<<< HEAD:example/demo.py
         print ('C START')
+=======
+        print 'C START'
+>>>>>>> master:example/demo.py
         time.sleep(sleep_time)
         # print 'C STOP'
 
     @delayed()
     def D():
+<<<<<<< HEAD:example/demo.py
         print ('D START')
+=======
+        print 'D START'
+>>>>>>> master:example/demo.py
         time.sleep(sleep_time)
         # print 'D STOP'
 
     @delayed()
     def F():
+<<<<<<< HEAD:example/demo.py
         print ('F START')
+=======
+        print 'F START'
+>>>>>>> master:example/demo.py
         time.sleep(sleep_time)
         # print 'F STOP'
 
@@ -67,13 +83,22 @@ def test():
     G = node.graph
     H, N, E = clean(G)
     evaluate(G)
+<<<<<<< HEAD:example/demo.py
     # nx.write_dot(H, '/tmp/test.dot')
+=======
+    #nx.write_dot(H, '/tmp/test.dot')
+>>>>>>> master:example/demo.py
     data = {
         'file': "/tmp/example"
     }
     nx.drawing.nx_pydot.write_dot(H, '{file}.dot'.format(**data))
     dot2svg("{file}.dot".format(**data))
+<<<<<<< HEAD:example/demo.py
     # os.system("open {file}.svg".format(**data))
     # browser("{file}.svg".format(**data))
+=======
+    #os.system("open {file}.svg".format(**data))
+    browser("{file}.svg".format(**data))
+>>>>>>> master:example/demo.py
 test()
 

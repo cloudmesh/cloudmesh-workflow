@@ -558,7 +558,6 @@ class Node(HasTraits):
         self.result.result(self.timeout)
         logging.info(self.f.__name__ + " finish")
 
-
     def eval(self):
         """eval() -> None
 
@@ -760,7 +759,11 @@ def test():
     def F():
         print ('F START')
         time.sleep(3)
+<<<<<<< HEAD
         # print ('F STOP')
+=======
+        # print 'F STOP'
+>>>>>>> master
 
     def clean(G):
         H = G.copy()
