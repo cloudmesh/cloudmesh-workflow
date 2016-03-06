@@ -8,3 +8,4 @@ code
 .tox
 *.egg-info
 __pycache__
+.cache
