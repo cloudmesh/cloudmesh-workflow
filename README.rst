@@ -32,7 +32,7 @@ of Python functions.
 
 See ReadTheDocs:
 
-- |unstable-docs|: unstable
+- |dev-docs|: dev
 - |master-docs|: master
 - http://cloudmesh.github.io/workflow
 
@@ -42,7 +42,7 @@ See ReadTheDocs:
 
 On Travis:
 
-- |unstable-status|: unstable
+- |dev-status|: dev
 - |master-status|: master
 
 ==============
@@ -51,7 +51,7 @@ On Travis:
 
 1. Fork.
 2. Add yourself to ``CONTRIBUTORS.md``.
-3. Make a pull-request against the ``unstable`` branch.
+3. Make a pull-request against the ``dev`` branch.
 
 
 =========
@@ -61,9 +61,9 @@ On Travis:
 See `LICENSE <https://github.com/cloudmesh/workflow/blob/master/LICENSE>`_
 
 
-.. |unstable-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=unstable
-   :target: http://cloudmesh-workflow.readthedocs.org/en/unstable
-   :alt: Documentation for unstable branch
+.. |dev-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=dev
+   :target: http://cloudmesh-workflow.readthedocs.org/en/dev
+   :alt: Documentation for dev branch
 
 .. |master-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=master
    :target: http://cloudmesh-workflow.readthedocs.org/en/master/
@@ -72,5 +72,5 @@ See `LICENSE <https://github.com/cloudmesh/workflow/blob/master/LICENSE>`_
 .. |master-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=master
     :target: https://travis-ci.org/cloudmesh/workflow
 
-.. |unstable-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=unstable
+.. |dev-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=dev
     :target: https://travis-ci.org/cloudmesh/workflow
