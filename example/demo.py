@@ -66,13 +66,17 @@ def test():
 
     G = node.graph
     H, N, E = clean(G)
-    evaluate(G)
+    # evaluate(G)
     # nx.write_dot(H, '/tmp/test.dot')
     data = {
         'file': "/tmp/example"
     }
     nx.drawing.nx_pydot.write_dot(H, '{file}.dot'.format(**data))
     dot2svg("{file}.dot".format(**data))
+    # PREFERED ENGINE IS DOT
+    for data["renderer"] in ["circo","dot","fdp","neato","osage","twopi"]:
+        os.system("{renderer} -Tsvg {file}.dot > {file}-{renderer}.svg".format(**data))
+        os.system("open {file}-{renderer}.svg".format(**data))
     # os.system("open {file}.svg".format(**data))
     # browser("{file}.svg".format(**data))
 
