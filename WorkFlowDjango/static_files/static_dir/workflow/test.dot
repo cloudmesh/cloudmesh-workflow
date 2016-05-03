@@ -1,0 +1,16 @@
+strict digraph "" {
+s [color=Red];
+b [color=Red];
+a [color=Red];
+c [color=Red];
+g [color=Red];
+e [color=Red];
+d [color=Red];
+s -> b  [dir=forward];
+s -> a  [dir=forward];
+b -> c  [dir=forward];
+a -> c  [dir=forward];
+c -> g  [dir=forward];
+c -> e  [dir=forward];
+c -> d  [dir=forward];
+}

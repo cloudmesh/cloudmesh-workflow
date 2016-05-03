@@ -1,0 +1,145 @@
+{% load staticfiles %}
+
+<html xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+        {{ template_title }}
+
+    </title>
+
+{#    <title>tags</title>#}
+{#    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>#}
+{#    <script type="text/javascript" src="{% static 'js/algorithms.js' %}"></script>#}
+
+{#    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>#}
+{#    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.min.js"></script>#}
+{#    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.geom.min.js"></script>#}
+
+{#    <script type="text/javascript">#}
+{#    $(document).ready(function() {#}
+{#      $(window).resize(function() {$('.resizable').resize(); })#}
+{##}
+{#    });#}
+{#    </script>#}
+{##}
+{#    <style type="text/css">#}
+{#      circle.node {#}
+{#        fill-opacity: .25;#}
+{#        stroke: #fff;#}
+{#        stroke-width: 1.5px;#}
+{#      }#}
+{#      line.link {#}
+{#        stroke: #999;#}
+{#        stroke-opacity: .6;#}
+{#      }#}
+{#      text {#}
+{#        font: 10px sans-serif;#}
+{#      }#}
+{#    </style>#}
+
+  </head>
+
+
+
+<body>
+
+
+    <script type="text/javascript" src="      {% static 'css/bootstrap-theme.css' %}"></script>
+
+{#<img src="{% static 'workflow/img1.JPG' %}" />#}
+
+<embed type="image/svg+xml" src="{% static 'workflow/test.svg' %}" />
+
+<input name="updateButton"
+           type="button"
+           value="Update"
+           onclick="updateData()" />
+{# <div id="tags" style="width:100%;height:500px;"></div>#}
+{#  <script type="text/javascript">#}
+{##}
+{#    var w = $('#tags').width(), h = $('#tags').height();#}
+{#    var fill = d3.scale.category20();#}
+{##}
+{#    var vis = d3.select('#tags')#}
+{#      .append('svg:svg')#}
+{#        .attr('width', w)#}
+{#        .attr('height', h);#}
+{##}
+{#    function updateData(){#}
+{##}
+{#    d3.json("{% url "play_count_by_month" %}", function(json) {#}
+{##}
+{#      var force = d3.layout.force()#}
+{#        .charge(-120)#}
+{#        .distance(50)#}
+{#        .gravity(.1)#}
+{#        .nodes(json.nodes)#}
+{#        .links(json.links)#}
+{#        .size([w, h])#}
+{#        .start();#}
+{##}
+{#      var link = vis.selectAll('line.link')#}
+{#          .data(json.links)#}
+{#        .enter().append('svg:line')#}
+{#          .attr("class", "link")#}
+{#          .style('stroke-width', 3)#}
+{#          .attr("x1", function(d) { return d.source.x; })#}
+{#          .attr("y1", function(d) { return d.source.y; })#}
+{#          .attr("x2", function(d) { return d.target.x; })#}
+{#          .attr("y2", function(d) { return d.target.y; });#}
+{##}
+{#      var node = vis.selectAll("circle.node")#}
+{#          .data(json.nodes)#}
+{#        .enter().append("svg:circle")#}
+{#          .attr("class", "node")#}
+{#          .attr("cx", function(d) { return d.x; })#}
+{#          .attr("cy", function(d) { return d.y; })#}
+{#          .attr("r", 15)#}
+{#          .style("fill", function(d) { return fill(d.group); })#}
+{#          .call(force.drag);#}
+{##}
+{#      node.append('svg:title')#}
+{#          .text(function(d) { return d.name; });#}
+{##}
+{#      node.filter().append("text")#}
+{#      .attr("dx", 12)#}
+{#      .attr("dy", ".35em")#}
+{#      .style("text-anchor","middle")#}
+{#      .text(function(d) { return d.name });#}
+{##}
+{#        force.on("tick", function(e) {#}
+{##}
+{#        var k = .5 * e.alpha;#}
+{#        node.each(function(d) {#}
+{#            d.y += ((4 - d.group) * 100 - d.y) * k;#}
+{#        });#}
+{##}
+{#        link.attr("x1", function(d) { return d.source.x; })#}
+{#            .attr("y1", function(d) { return d.source.y; })#}
+{#            .attr("x2", function(d) { return d.target.x; })#}
+{#            .attr("y2", function(d) { return d.target.y; });#}
+{##}
+{#        node.attr("cx", function(d) { return d.x ; })#}
+{#            .attr("cy", function(d) { return d.y; });#}
+{##}
+{#      });#}
+{##}
+{#    });#}
+{#    }#}
+{#  </script>1#}
+<form method="POST" action="">{% csrf_token %}
+{#    <input type="text">#}
+{{ initform.as_p }}
+    <input type="submit" value="sign up">
+</form>
+
+{#<form method="POST" action="">{% csrf_token %}#}
+{#    <input type="text">#}
+{#{{ initform.as_p }}#}
+{#    <input type="submit" value="sign up">#}
+{#</form>#}
+
+</body>
+</html>

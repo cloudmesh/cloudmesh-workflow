@@ -1,0 +1,95 @@
+{% load staticfiles %}
+
+<html>
+ <head>
+{#  <script type="text/javascript" src="dracula/js/raphael-min.js"></script>#}
+{#  <script type="text/javascript" src="dracula/js/dracula_graffle.js"></script>#}
+{#  <script type="text/javascript" src="dracula/js/jquery-1.4.2.min.js"></script>#}
+      <script type="text/javascript" src="{% static 'js/jquery-1.4.2.min.js' %}"></script>
+{#  <script type="text/javascript" src="dracula/js/dracula_graph.js"></script>#}
+       <script type="text/javascript" src="{% static 'js/raphael-min.js' %}"></script>
+    <script type="text/javascript" src="      {% static 'js/dracula_graffle.js' %}"></script>
+    <script type="text/javascript" src="      {% static 'js/dracula_graph.js' %}"></script>
+{#    <script type="text/javascript" src="      {% static 'js/dracula_algorithms.js' %}"></script>#}
+{#      <script type="text/javascript" src="../js/dracula_algorithms.js"></script>#}
+{#    <script type="text/javascript" src="      {% static 'js/algorithms.js' %}"></script>#}
+    <!--  Dracula  -->
+
+    </head>
+
+    <body>
+        <div id='canvas'>
+        </div>
+        <script type="text/javascript">
+          var render = function(r, n) {
+          var set = r.set().push(
+          r.rect(n.point[0] - 30, n.point[1] - 13, 62, 86).attr({
+                             "fill": "#fa8",
+                             "stroke-width": 2,
+                              r: "1px"
+          })).push(r.text(n.point[0], n.point[1] + 30, n.label).attr({
+                                   "font-size": "14px"
+              })); /* custom tooltip attached to the set */
+          set.items.forEach(
+               function(el) {
+                  el.tooltip(r.set().push(r.rect(0, 0, 0, 0).attr({
+                                     "fill": "#fec",
+                                     "stroke-width": 1,
+                                     r: "9px"
+                   })))
+               });
+          return set;
+          };
+
+          $(document).ready(function() {
+             var width = $(document).width() ;
+             var height = $(document).height() - 100;
+             var g = new Graph();
+             var data = {
+               "vertices": [ "A", "B", "C", "D\n some More Sample\n Text", "E","F"],
+               "edges": [
+                          [
+                           0, 1],
+                          [
+                           0, 2],
+                          [
+                           0, 3],
+                          [
+                           2, 4],
+                          [
+                           3, 4],
+                          [
+                           4, 5]
+                         ]
+            };
+
+
+            addNodes(data.vertices, g);
+            addEdges(data.edges, g);
+
+            var layouter = new Graph.Layout.Spring(g);
+            layouter.layout(); /* draw the graph using the RaphaelJS draw implementation */
+            var renderer = new Graph.Renderer.Raphael('canvas', g, width, height);
+                                       renderer.draw();
+
+                               });
+
+            function addNodes(vertices, g) {
+                jQuery.each(vertices, function(index, text) {
+                g.addNode(index, {
+                     label: text,
+                     render: render
+                             });
+                           });
+                               }
+                 function addEdges(edges, g) {
+                 jQuery.each(edges, function(index, arr) {
+                 g.addEdge(arr[0], arr[1], {
+                      directed: true
+                   })
+                 });
+                               }
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,10 @@
+<h1>formsss</h1>
+
+{{ template_title }}
+
+<form method="POST" action="">{% csrf_token %}
+{#    <input type="text">#}
+{{ form.as_p }}
+    <input type="submit" value="sign up">
+</form>
+</html>
