@@ -10,4 +10,9 @@ setup(
     version=VERSION,
     packages=find_packages(),
     license='Apache 2.0',
+    entry_points={
+        'console_scripts': [
+            'cm-w = cloudmesh_workflow.WorkflowCommand:command',
+        ],
+    },
 )

@@ -7,6 +7,12 @@ from pprint import pprint
 from cloudmesh_client.common.hostlist import Parameter
 from cloudmesh_client.common.dotdict import dotdict
 from cloudmesh_client.cloud.workflowexec import *
+
+
+def command(arguments):
+    print (arguments)
+
+
 class WorkflowCommand(PluginCommand, CloudPluginCommand):
     topics = {"workflow": "todo"}
 
