@@ -13,7 +13,7 @@ setup(
     license='Apache 2.0',
     entry_points={
         'console_scripts': [
-            'cm-w = cloudmesh_workflow.wrapper:run',
+            'cm-w = cloudmesh_workflow.wrapper:main',
         ],
     },
 )

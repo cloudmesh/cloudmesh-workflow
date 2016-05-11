@@ -1,6 +1,8 @@
+import sys
 
-class wrapper(object):
+def main(arguments):
+    print (arguments)
 
-    def run(arguments):
-        print (arguments)
 
+if __name__ == '__main__':
+    main(sys.arg)
