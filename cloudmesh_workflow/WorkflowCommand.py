@@ -146,3 +146,8 @@ class WorkflowCommand(PluginCommand, CloudPluginCommand):
             # Console.msg()
             # mkdir -pf ~/.cloudmesh/workflow
             pass
+        
+        
+
+if __name__ == '__main__':
+    pass
