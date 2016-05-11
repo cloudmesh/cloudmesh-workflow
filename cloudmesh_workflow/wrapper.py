@@ -1,16 +1,17 @@
-from __futures__ import print_function
+from __future__ import print_function
 import sys
-from cloudmesh_workflow.WorkflowCommand import WorkflowCommand
+# from cloudmesh_workflow.WorkflowCommand import WorkflowCommand
 
-def main():
+def run():
 
     args = sys.argv[1:]
     print ("AAA")
-    print (args)
+    print ("HHHH", args)
 
-    print(WorkflowCommand)
+    # print(WorkflowCommand)
 
-    print (r)
+    # print (r)
 
 if __name__ == '__main__':
-    main()
+    print ("IIII")
+    run()
