@@ -31,37 +31,29 @@ list:
 	$(call banner, "TARGETS")
 	@grep '^[^#[:space:]].*:' Makefile
 
-setup:
-	# brew update
-	# brew install mongodb
-	# brew install jq
-	rm -rf ~/.cloudmesh/data/db
-	mkdir -p ~/.cloudmesh/data/db
-
-kill:
-	killall mongod
-
-mongo:
-	$(call terminal, $(MONGOD))
-
 source:
-	pip install -e .
+	cd ../cloudmesh-cmd5; make source
+	$(call banner, "Install cloudmesh-workflow")
+	pip install -e . -U
 	cms help
 
-test:
-	$(call banner, "LIST SERVICE")
-	curl -s -i http://127.0.0.1:5000 
-	$(call banner, "LIST PROFILE")
-	@curl -s http://127.0.0.1:5000/profile  | jq
-	$(call banner, "LIST CLUSTER")
-	@curl -s http://127.0.0.1:5000/cluster  | jq
-	$(call banner, "LIST COMPUTER")
-	@curl -s http://127.0.0.1:5000/computer  | jq
-	$(call banner, "INSERT COMPUTER")
-	curl -d '{"name": "myCLuster",	"label": "c0","ip": "127.0.0.1","memoryGB": 16}' -H 'Content-Type: application/json'  http://127.0.0.1:5000/computer  
-	$(call banner, "LIST COMPUTER")
-	@curl -s http://127.0.0.1:5000/computer  | jq
+requirements:
+	echo "cloudmesh-cmd5" > tmp.txt
+	echo "cloudmesh-sys" >> tmp.txt
+	echo "cloudmesh-inventory" >> tmp.txt
+	echo "cloudmesh-configuration" >> tmp.txt
+	pip-compile setup.py
+	fgrep -v "# via" requirements.txt | fgrep -v "cloudmesh" >> tmp.txt
+	mv tmp.txt requirements.txt
+	git commit -m "update requirements" requirements.txt
+	git push
 
+
+
+install:
+	cd ../common; pip install .
+	cd ../cmd5; pip install .
+	pip install .
 
 clean:
 	rm -rf *.zip
@@ -76,10 +68,6 @@ clean:
 	rm -rf .tox
 	rm -f *.whl
 
-install:
-	cd ../common; pip install .
-	cd ../cmd5; pip install .
-	pip install .
 
 ######################################################################
 # PYPI

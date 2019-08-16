@@ -4,7 +4,7 @@
 
 
 
-.. automodule:: cloudmesh_workflow.workflow
+.. automodule:: cloudmesh.workflow.workflow
    :members:
    :undoc-members:
    :show-inheritance:

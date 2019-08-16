@@ -1,8 +1,9 @@
-from cloudmesh_workflow.workflow import Graph
-from cloudmesh_workflow.workflow import delayed
-from cloudmesh_workflow.workflow import evaluate
-from cloudmesh_workflow.util import dot2svg, browser
+from cloudmesh.workflow.workflow import Graph
+from cloudmesh.workflow.workflow import PythonTask
+from cloudmesh.workflow.workflow import evaluate
+from cloudmesh.common.Shell import Shell
 import networkx as nx
+from networkx.drawing.nx_agraph import write_dot
 import time
 import os
 
@@ -10,35 +11,35 @@ sleep_time = 1
 
 def test():
 
-    @delayed()
+    @PythonTask()
     def A():
-        print 'A START'
+        print ('A START')
         # for i in xrange(10):
         #     print 'A', i
         time.sleep(sleep_time)
         # print 'A STOP'
 
-    @delayed()
+    @PythonTask()
     def B():
-        print 'B START'
+        print ('B START')
         time.sleep(sleep_time)
         # print 'B STOP'
 
-    @delayed()
+    @PythonTask()
     def C():
-        print 'C START'
+        print ('C START')
         time.sleep(sleep_time)
         # print 'C STOP'
 
-    @delayed()
+    @PythonTask()
     def D():
-        print 'D START'
+        print ('D START')
         time.sleep(sleep_time)
         # print 'D STOP'
 
-    @delayed()
+    @PythonTask()
     def F():
-        print 'F START'
+        print ('F START')
         time.sleep(sleep_time)
         # print 'F STOP'
 
@@ -61,6 +62,7 @@ def test():
     # node = ( A() & B() | C() )
     # node = ( A() | (B() & C()) )
     # node = ( ((A() & B()) | C()) & (D() | F()) )
+
     node = (A() | B() | C()) & (D() | F())
 
     G = node.graph
@@ -70,9 +72,10 @@ def test():
     data = {
         'file': "/tmp/example"
     }
-    nx.drawing.nx_pydot.write_dot(H, '{file}.dot'.format(**data))
-    dot2svg("{file}.dot".format(**data))
+    write_dot(H, '{file}.dot'.format(**data))
+    Shell.dot2svg("{file}.dot".format(**data))
     #os.system("open {file}.svg".format(**data))
-    browser("{file}.svg".format(**data))
+    Shell.browser("{file}.svg".format(**data))
+
 test()
 

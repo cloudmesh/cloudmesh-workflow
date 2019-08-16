@@ -1,21 +1,7 @@
 #
-# Copyright 2016 Badi' Abdul-Wahid
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-#
-# Author: Badi' Abdul-Wahid <badi@iu.edu>
-# Organization: Indiana University / FutureSystems
+# Author: Badi' Abdul-Wahid
+#         Gregor von Laszewski <laszewski@gmail.com>
+# Organization: Indiana University
 #
 from __future__ import absolute_import
 
@@ -35,19 +21,19 @@ __doc__ = """\
 Usage Summary
 =============
 
-1. Define delayed functions:
+1. Define PythonTask functions:
 
 
->>> @delayed()
+>>> @PythonTask()
 ... def A(foo):
 ...   time.sleep(0.05)
 ...   print foo
 >>>
->>> @delayed()
+>>> @PythonTask()
 ... def B():
-...   print 'Boo!'
+...   print ('Boo!'
 >>>
->>> @delayed()
+>>> @PythonTask()
 ... def C(x, y):
 ...   return x ** y
 
@@ -57,7 +43,7 @@ Usage Summary
 
 >>> root_node = (A('hello world!') | B()) & C(4, 2)
 >>> root_node
-<cloudmesh_workflow.workflow.AndNode object at ...>
+<cloudmesh.workflow.workflow.AndNode object at ...>
 
 3. Evaluate the resulting graph
 
@@ -99,19 +85,19 @@ should be defined as such:
 Usage
 =====
 
-The first part is to mark top-level functions as :func:`delayed`.  The
-``@delayed()`` decoration wraps the function so that calling the
+The first part is to mark top-level functions as :func:`PythonTask`.  The
+``@PythonTask()`` decoration wraps the function so that calling the
 function inserts the :class:`Node`, without applying the parameters,
 into the call :class:`Graph`. You can access the ``graph`` property of
 any node to get the current call graph.
 
-For example, define two delayed functions ``A`` and ``B``:
+For example, define two functions ``A`` and ``B``:
 
->>> @delayed()
+>>> @PythonTask()
 ... def A(x):
 ...   return x*2
 
->>> @delayed()
+>>> @PythonTask()
 ... def B(x, y):
 ...   return x ** y
 
@@ -144,19 +130,19 @@ Cloudmesh Workflow Example
 .. code-block:: python
 
   from cloudmesh_base import Shell
-  from workflow import delayed, evaluate
+  from workflow import PythonTask, evaluate
 
-  @delayed()
+  @PythonTask()
   def FutureSystems():
     "Start a VM on FutureSystems OpenStack Kilo"
     Shell.cm('boot', 'kilo')
 
-  @delayed()
+  @PythonTask()
   def Cybera(x, y):
     "Start a VM on Cybera cloud"
     Shell.cm('boot', 'cybera')
 
-  @delayed()
+  @PythonTask()
   def Rackspace():
     "Start a VM on Rackspace"
     Shell.cm('boot', 'rackspace')
@@ -173,11 +159,11 @@ Concepts
 Deferring function evaluation
 -----------------------------
 
-A :class:`delayed` is intended to be used as a decorator to lift
-arbitrary functions to have delayed semantics. Evaluation semantics of
-:class:`delayed` objects is:
+A :class:`PythonTask` is intended to be used as a decorator to lift
+arbitrary functions to have PythonTask semantics. Evaluation semantics of
+:class:`PythonTask` objects is:
 
-1. calling a delayed function stores the arguments and returns a :class:`Node`.
+1. calling a PythonTask function stores the arguments and returns a :class:`Node`.
 
 2. :class:`Node`\ s are composed using bitwise ``&`` and ``|``
    operators to denote sequential and parallel evaluation order,
@@ -187,7 +173,7 @@ arbitrary functions to have delayed semantics. Evaluation semantics of
 Composing :class:`Node`\ s for parallel/sequential semantics
 ------------------------------------------------------------
 
-A :class:`Node` captures the evaluation state of a :class:`delayed`
+A :class:`Node` captures the evaluation state of a :class:`PythonTask`
 function. It provides several important attributes:
 
 1. :attr:`~Node.graph`\ : the evaluation graph in which the function
@@ -202,12 +188,12 @@ function. It provides several important attributes:
 4. :attr:`~Node.result`\ : the status and result of the evaluation.
 
 
-:class:`Node`\ s are created by calling :class:`delayed` functions and
+:class:`Node`\ s are created by calling :class:`PythonTask` functions and
 then composed using ``&`` and ``|``. Each composition returns a new
 :class:`Node` in the graph.
 
 
-Evaluation of a delayed function
+Evaluation of a PythonTask function
 --------------------------------
 
 Once :class:`Node`\ s have been composed to achieve the desired
@@ -222,7 +208,7 @@ API
 """
 
 __all__ = [
-    'delayed', 'evaluate',
+    'PythonTask', 'evaluate',
     'Node', 'OpNode', 'AndNode', 'OrNode', 'Graph',
     'find_root_node',
 ]
@@ -256,8 +242,8 @@ def nodeid():
     return uuid.uuid4()
 
 
-class delayed(object):
-    """A :class:`delayed` is a decorator that delays evaluation of a function
+class PythonTask(object):
+    """A :class:`PythonTask` is a decorator that delays evaluation of a function
     until explicitly called for using :func:`evaluate`.
 
     Intended usage: decorate a function such that :meth:`~object.__call__`\
@@ -268,7 +254,7 @@ class delayed(object):
 
     Example:
 
-    >>> @delayed()
+    >>> @PythonTask()
     ... def foo(*args):
     ...   for a in args:
     ...     print a
@@ -276,7 +262,7 @@ class delayed(object):
     <type 'function'>
     >>> node = foo(1, 2) & foo(3, 4)
     >>> print node
-    <cloudmesh_workflow.workflow.AndNode object at ...>
+    <cloudmesh.workflow.workflow.AndNode object at ...>
     >>> evaluate(node.graph)
     1
     2
@@ -321,7 +307,7 @@ def find_root_node(graph):
     Example:
 
 
-    >>> @delayed()
+    >>> @PythonTask()
     ... def foo(a):
     ...   return a
     >>> node = foo(42) | foo(24)
@@ -346,7 +332,7 @@ def evaluate(graph):
 
     Example:
 
-    >>> @delayed()
+    >>> @PythonTask()
     ... def foo(a):
     ...   return a
     >>> node = foo(42) & foo(24)
@@ -373,8 +359,8 @@ class Node(HasTraits):
     evaluation order, respectively.
 
     For example, give ``A``, ``B``, and ``C`` functions that have been
-    lifted to a :class:`Node` type (eg through the :class:`delayed`
-    decorator ``@delayed()``), to evaluate ``A`` and ``B`` in parallel,
+    lifted to a :class:`Node` type (eg through the :class:`PythonTask`
+    decorator ``@PythonTask()``), to evaluate ``A`` and ``B`` in parallel,
     then ``C``:
 
     .. code-block:: python
@@ -457,7 +443,7 @@ class Node(HasTraits):
         self.f = f
         self._args = args
         self._kws = kws
-        self.name = f.func_name
+        self.name = f.__name__
         self.graph = graph
         self.executor = executor or futures.ThreadPoolExecutor(cpu_count())
         self.timeout = timeout
@@ -650,10 +636,10 @@ class AndNode(OpNode):
 
     Example:
 
-    >>> @delayed()
+    >>> @PythonTask()
     ... def foo(a): return 42
     >>> foo(42) & foo(24)
-    <cloudmesh_workflow.workflow.AndNode object at ...>
+    <cloudmesh.workflow.workflow.AndNode object at ...>
 
     """
 
@@ -688,10 +674,10 @@ class OrNode(OpNode):
 
     Example:
 
-    >>> @delayed()
+    >>> @PythonTask()
     ... def foo(a): return 42
     >>> foo(42) | foo(24)
-    <cloudmesh_workflow.workflow.OrNode object at ...>
+    <cloudmesh.workflow.workflow.OrNode object at ...>
     """
 
     # Implementation notes:
@@ -717,37 +703,37 @@ class OrNode(OpNode):
 
 def test():
 
-    @delayed()
+    @PythonTask()
     def A():
-        print 'A START'
+        print ('A START')
         # for i in xrange(10):
-        #     print 'A', i
+        #     print ('A', i
         time.sleep(3)
-        # print 'A STOP'
+        # print ('A STOP')
 
-    @delayed()
+    @PythonTask()
     def B():
-        print 'B START'
+        print ('B START')
         time.sleep(3)
-        # print 'B STOP'
+        # print ('B STOP')
 
-    @delayed()
+    @PythonTask()
     def C():
-        print 'C START'
+        print ('C START')
         time.sleep(3)
-        # print 'C STOP'
+        # print ('C STOP')
 
-    @delayed()
+    @PythonTask()
     def D():
-        print 'D START'
+        print ('D START')
         time.sleep(3)
-        # print 'D STOP'
+        # print ('D STOP')
 
-    @delayed()
+    @PythonTask()
     def F():
-        print 'F START'
+        print ('F START')
         time.sleep(3)
-        # print 'F STOP'
+        # print ('F STOP')
 
     def clean(G):
         H = G.copy()
