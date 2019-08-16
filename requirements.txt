@@ -1,7 +1,1 @@
-pydotplus
-networkx
-futures
-astor
-traits
-sphinx
-sphinx_rtd_theme
+# not yet
