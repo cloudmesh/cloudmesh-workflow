@@ -58,18 +58,18 @@ On Travis:
  License
 =========
 
-See `LICENSE <https://github.com/cloudmesh/workflow/blob/master/LICENSE>`_
+See `LICENSE <https://github.com/cloudmesh/workflow/blob/main/LICENSE>`_
 
 
 .. |unstable-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=unstable
    :target: http://cloudmesh-workflow.readthedocs.org/en/unstable
    :alt: Documentation for unstable branch
 
-.. |master-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=master
-   :target: http://cloudmesh-workflow.readthedocs.org/en/master/
-   :alt: Documentation for master branch
+.. |master-docs| image:: http://readthedocs.org/projects/cloudmesh-workflow/badge/?version=main
+   :target: http://cloudmesh-workflow.readthedocs.org/en/main/
+   :alt: Documentation for main branch
 
-.. |master-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=master
+.. |master-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=main
     :target: https://travis-ci.org/cloudmesh/workflow
 
 .. |unstable-status| image:: https://travis-ci.org/cloudmesh/workflow.svg?branch=unstable
